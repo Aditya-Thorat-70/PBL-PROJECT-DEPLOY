@@ -1,4 +1,5 @@
 const trimTrailingSlash = (value) => value.replace(/\/+$/, "");
+const DEPLOYED_BACKEND_URL = "https://pbl-project-deploy.onrender.com";
 
 const resolveApiBaseUrl = () => {
   const configured = (import.meta.env.VITE_API_BASE_URL || "").trim();
@@ -7,13 +8,14 @@ const resolveApiBaseUrl = () => {
   }
 
   if (typeof window !== "undefined") {
-    const { hostname, origin } = window.location;
-    if (hostname !== "localhost" && hostname !== "127.0.0.1") {
-      return trimTrailingSlash(origin);
+    const { hostname } = window.location;
+    if (hostname === "localhost" || hostname === "127.0.0.1") {
+      return "http://localhost:5000";
     }
   }
 
-  return "http://localhost:5000";
+  // Safe production fallback for this deployment when env vars are missing.
+  return DEPLOYED_BACKEND_URL;
 };
 
 const resolveSocketUrl = (apiBaseUrl) => {
