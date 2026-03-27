@@ -37,8 +37,8 @@ exports.uploadFile = async (req, res) => {
         fileSize = convertedStats.size;
       } catch (convertError) {
         // Keep original upload when conversion isn't possible on this host.
-        conversionWarning = `Uploaded original file because conversion failed: ${convertError.message}`;
-        console.warn("[Upload Warn]", conversionWarning);
+        conversionWarning = "Uploaded original file. PDF conversion is currently unavailable for this file.";
+        console.warn("[Upload Warn] PDF conversion failed, original file kept:", convertError.message);
       }
     }
 
