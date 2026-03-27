@@ -19,7 +19,7 @@ export default function App() {
   const [mobilePrefillRoomId, setMobilePrefillRoomId] = useState(null);
   const [roomFiles, setRoomFiles] = useState({ [initialRoomId]: [] });
   const [socket, setSocket] = useState(null);
-  const { toasts, toast } = useToast();
+  const { toasts, toast, removeToast } = useToast();
 
   const files = roomFiles[roomId] || [];
 
@@ -213,7 +213,7 @@ export default function App() {
           </>
         )}
       </div>
-      <ToastContainer toasts={toasts} />
+      <ToastContainer toasts={toasts} onClose={removeToast} />
     </div>
   );
 }
