@@ -2,6 +2,8 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const http = require("http");
+const path = require("path");
+const fs = require("fs");
 const { Server } = require("socket.io");
 require("dotenv").config();
 
@@ -29,26 +31,66 @@ const { startCleanupInterval } = require("./utils/deleteExpiredFiles");
 
 const app = express();
 const server = http.createServer(app);
+
+const uploadsDir = path.resolve(__dirname, "uploads");
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+const parseAllowedOrigins = () => {
+  const origins = process.env.CORS_ORIGIN || process.env.CORS_ORIGINS || "";
+  return origins
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+};
+
+const allowedOrigins = parseAllowedOrigins();
+
+const isOriginAllowed = (origin) => {
+  if (!origin) return true;
+  if (allowedOrigins.length === 0) return true;
+  if (allowedOrigins.includes("*")) return true;
+  return allowedOrigins.includes(origin);
+};
+
+const corsOriginHandler = (origin, callback) => {
+  if (isOriginAllowed(origin)) {
+    return callback(null, true);
+  }
+
+  return callback(new Error("Origin not allowed by CORS"));
+};
+
+const corsOptions = {
+  origin: corsOriginHandler,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  credentials: false,
+};
+
 const io = new Server(server, {
   cors: {
-    origin: "*",
-    methods: ["GET", "POST"]
+    origin: corsOriginHandler,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    credentials: false,
   }
 });
 
-app.use(cors());
+app.set("trust proxy", true);
+app.use(cors(corsOptions));
 app.use(express.json());
-app.use("/uploads", express.static("uploads"));
+app.use("/uploads", express.static(uploadsDir));
+
+app.get("/api/health", (req, res) => {
+  res.status(200).json({
+    status: "ok",
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+  });
+});
 
 // Make io accessible to routes
 app.set('io', io);
-
-mongoose.connect(process.env.MONGO_URI)
-.then(() => {
-  console.log("MongoDB Connected");
-  startCleanupInterval();
-})
-.catch(err => console.log(err));
 
 app.use("/api/rooms", require("./routes/roomRoutes"));
 app.use("/api/files", require("./routes/fileRoutes"));
@@ -101,5 +143,23 @@ io.on("connection", (socket) => {
 });
 
 const PORT = process.env.PORT || 5000;
+const MONGO_URI = process.env.MONGO_URI;
 
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+const startServer = async () => {
+  if (!MONGO_URI) {
+    throw new Error("Missing MONGO_URI. Add it to backend environment variables.");
+  }
+
+  await mongoose.connect(MONGO_URI);
+  console.log("MongoDB Connected");
+  startCleanupInterval();
+
+  server.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+};
+
+startServer().catch((error) => {
+  console.error("[Startup Error]", error?.message || error);
+  process.exit(1);
+});

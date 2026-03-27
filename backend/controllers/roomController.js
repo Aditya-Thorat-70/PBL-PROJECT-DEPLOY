@@ -3,14 +3,30 @@ const crypto = require("crypto");
 
 exports.createRoom = async (req, res) => {
   try {
-    const roomId = crypto.randomUUID().replace(/-/g, '').slice(0, 6).toUpperCase();
+    let room = null;
+    const maxAttempts = 5;
 
-    const expiresAt = new Date(Date.now() + 3 * 60 * 60 * 1000);
+    for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+      const roomId = crypto.randomUUID().replace(/-/g, '').slice(0, 6).toUpperCase();
+      const expiresAt = new Date(Date.now() + 3 * 60 * 60 * 1000);
 
-    const room = await Room.create({
-      roomId,
-      expiresAt
-    });
+      try {
+        // eslint-disable-next-line no-await-in-loop
+        room = await Room.create({
+          roomId,
+          expiresAt,
+        });
+        break;
+      } catch (error) {
+        if (error?.code !== 11000) {
+          throw error;
+        }
+      }
+    }
+
+    if (!room) {
+      return res.status(503).json({ message: "Unable to create room. Please retry." });
+    }
 
     res.json(room);
   } catch (err) {

@@ -8,8 +8,7 @@ import ToastContainer from "./components/Toast";
 import { useToast } from "./hooks/useToast";
 import { generateRoomId } from "./utils/helpers";
 import { createRoom, fetchFilesByRoom, uploadFileToRoom } from "./utils/api";
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+import { SOCKET_URL } from "./utils/config";
 
 export default function App() {
   const initialRoomId = generateRoomId();
@@ -46,7 +45,7 @@ export default function App() {
 
   // Setup Socket.io connection
   useEffect(() => {
-    const newSocket = io(API_BASE_URL, {
+    const newSocket = io(SOCKET_URL, {
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
