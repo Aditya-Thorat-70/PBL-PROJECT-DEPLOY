@@ -17,7 +17,6 @@ exports.uploadFile = async (req, res) => {
     let originalName = req.file.originalname;
     let mimeType = req.file.mimetype;
     let fileSize = req.file.size;
-    let conversionWarning = null;
 
     // Convert non-PDF uploads to PDF so dashboard consistently handles a single print format.
     if (mimeType !== "application/pdf") {
@@ -36,9 +35,15 @@ exports.uploadFile = async (req, res) => {
         mimeType = "application/pdf";
         fileSize = convertedStats.size;
       } catch (convertError) {
-        // In production hosts where LibreOffice is unavailable, keep original upload.
-        conversionWarning = "PDF conversion skipped on server. Original file was uploaded.";
-        console.warn("[Upload Warn] PDF conversion failed, keeping original file:", convertError.message);
+        // Keep upload directory clean if conversion fails.
+        if (fs.existsSync(req.file.path)) {
+          await fsPromises.unlink(req.file.path);
+        }
+
+        return res.status(503).json({
+          message: "File conversion to PDF failed. Ensure LibreOffice is installed and accessible on the server.",
+          error: convertError.message,
+        });
       }
     }
 
@@ -64,8 +69,7 @@ exports.uploadFile = async (req, res) => {
 
     res.status(200).json({
       message: "File uploaded successfully",
-      file: newFile,
-      conversionWarning,
+      file: newFile
     });
 
   } catch (error) {
