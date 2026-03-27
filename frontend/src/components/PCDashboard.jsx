@@ -1,3 +1,4 @@
+import { useMemo, useState } from "react";
 import QRCodeCard from "./QRCodeCard";
 import FileList from "./FileList";
 
@@ -12,9 +13,12 @@ export default function PCDashboard({
   onView,
   onPrint,
 }) {
+  const [showInputRoomId, setShowInputRoomId] = useState(false);
+  const maskedRoomId = useMemo(() => (roomId ? "*".repeat(String(roomId).length) : ""), [roomId]);
+
   const stats = [
     { label: "Files Ready", val: files.length, icon: "📑" },
-    { label: "Room ID", val: roomId, icon: "🔑" },
+    { label: "Room ID", val: maskedRoomId, icon: "🔑" },
     { label: "Status", val: "Online", icon: "🟢" },
   ];
 
@@ -42,7 +46,7 @@ export default function PCDashboard({
 
       {/* Main grid */}
       <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-5">
-        <QRCodeCard roomId={roomId} onGenerate={onGenerate} />
+        <QRCodeCard roomId={roomId} onGenerate={onGenerate} showRoomId={false} />
 
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-6">
           <div className="mb-5 flex flex-col gap-3">
@@ -50,22 +54,35 @@ export default function PCDashboard({
               <h2 className="font-extrabold text-xl text-gray-900" style={{ fontFamily: "Syne, sans-serif" }}>
                 Uploaded Files
               </h2>
-              {files.length > 0 && (
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">
-                  {files.length} file{files.length !== 1 ? "s" : ""}
-                </span>
-              )}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setShowInputRoomId((prev) => !prev)}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all"
+                  title={showInputRoomId ? "Hide Input ID" : "Show Input ID"}
+                  aria-label={showInputRoomId ? "Hide Input ID" : "Show Input ID"}
+                >
+                  👁 {showInputRoomId ? "Hide ID" : "Show ID"}
+                </button>
+                {files.length > 0 && (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+                    {files.length} file{files.length !== 1 ? "s" : ""}
+                  </span>
+                )}
+              </div>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-2">
               <input
-                type="text"
+                type={showInputRoomId ? "text" : "password"}
                 value={roomInput}
                 onChange={(e) => onRoomInputChange(e.target.value.toUpperCase())}
                 placeholder="Enter Room ID"
                 maxLength={6}
                 className="w-full sm:max-w-[220px] px-3 py-2 rounded-xl border border-gray-200 text-sm font-bold tracking-widest text-gray-900 bg-white focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all"
                 style={{ fontFamily: "Syne, sans-serif" }}
+                autoComplete="off"
+                autoCorrect="off"
+                spellCheck={false}
               />
               <button
                 onClick={onOpenRoom}

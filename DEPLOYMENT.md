@@ -9,6 +9,7 @@ Create `backend/.env` from `backend/.env.example` and set:
 - `MONGO_URI` (required)
 - `MAX_UPLOAD_SIZE_MB` (optional)
 - `FILE_RETENTION_HOURS` (optional)
+- `LIBREOFFICE_PATH` (optional): path to `soffice` binary
 - `CORS_ORIGINS` (required in production): comma-separated frontend origins
 
 Example:
@@ -18,12 +19,19 @@ PORT=5000
 MONGO_URI=mongodb+srv://<username>:<password>@<cluster-host>/<db-name>
 MAX_UPLOAD_SIZE_MB=50
 FILE_RETENTION_HOURS=3
+LIBREOFFICE_PATH=/usr/bin/soffice
 CORS_ORIGINS=https://your-frontend-domain.com
 ```
 
 ### Important for PDF conversion behavior
 
-The backend now uses a pure Node conversion pipeline for supported formats (for example `.docx`, `.pptx`, `.xlsx`, `.txt`, `.png`, `.jpg`) and does not require LibreOffice.
+Backend conversion now follows this order:
+
+1. Try LibreOffice conversion first (best layout/image preservation, supports `.ppt` and `.doc`).
+2. If LibreOffice fails/unavailable, fall back to local Node conversion for supported formats.
+3. If both fail, upload original file and return `conversionWarning`.
+
+To maximize conversion success (target 7-8 out of 10+ files), deploy backend with LibreOffice installed (Render Docker using [backend/Dockerfile](backend/Dockerfile)).
 
 If conversion is not possible for a given file, the original file is uploaded instead and the API returns a `conversionWarning`.
 
@@ -81,7 +89,7 @@ Deploy the `frontend/dist` output to your static hosting provider.
 - Upload a file from mobile and verify it appears in PC dashboard.
 - Confirm real-time updates (Socket.IO) work.
 - Open uploaded file preview URL and print/download URL.
-- Upload `.docx`, `.pptx`, or `.txt` and verify PDF conversion for supported content.
+- Upload `.ppt`, `.pptx`, `.doc`, `.docx` and verify PDF conversion.
 - Upload edge-case files and confirm upload still succeeds even if a conversion warning appears.
 
 ## Notes

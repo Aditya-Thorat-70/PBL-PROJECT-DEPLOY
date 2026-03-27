@@ -1,8 +1,9 @@
 import QRCodeSVG from "./QRCodeSVG";
 
-export default function QRCodeCard({ roomId, onGenerate }) {
+export default function QRCodeCard({ roomId, onGenerate, showRoomId = false }) {
   const mobileBaseUrl = import.meta.env.VITE_MOBILE_URL || window.location.origin;
   const mobileUploadUrl = `${mobileBaseUrl}/?view=mobile&room=${encodeURIComponent(roomId)}`;
+  const displayedRoomId = showRoomId ? roomId : "*".repeat(String(roomId || "").length);
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 flex flex-col items-center gap-5">
@@ -25,7 +26,7 @@ export default function QRCodeCard({ roomId, onGenerate }) {
           className="text-3xl font-extrabold tracking-[0.18em] bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent"
           style={{ fontFamily: "Syne, sans-serif" }}
         >
-          {roomId}
+          {displayedRoomId}
         </div>
       </div>
 
