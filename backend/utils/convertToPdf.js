@@ -3,14 +3,12 @@ const path = require("path");
 const { execFile } = require("child_process");
 const { promisify } = require("util");
 const PDFDocument = require("pdfkit");
-const officeParser = require("officeparser");
 
 const execFileAsync = promisify(execFile);
 
-const TEXT_EXTENSIONS = new Set([".txt", ".csv", ".md", ".rtf"]);
-const OFFICE_EXTENSIONS = new Set([".docx", ".pptx", ".xlsx", ".odt", ".odp", ".ods"]);
+const TEXT_EXTENSIONS = new Set([".txt", ".csv", ".md"]);
 const IMAGE_EXTENSIONS = new Set([".jpg", ".jpeg", ".png"]);
-const LIBREOFFICE_EXTENSIONS = new Set([
+const STRICT_LIBREOFFICE_EXTENSIONS = new Set([
   ".doc", ".docx", ".ppt", ".pptx", ".xls", ".xlsx", ".odt", ".odp", ".ods", ".rtf", ".txt", ".csv",
 ]);
 
@@ -54,6 +52,8 @@ const getLibreOfficeCandidates = () => {
     "soffice",
     "libreoffice",
     "soffice.exe",
+    "C:\\Program Files\\LibreOffice\\program\\soffice.exe",
+    "C:\\Program Files (x86)\\LibreOffice\\program\\soffice.exe",
   ].filter(Boolean);
 
   return [...new Set(candidates)];
@@ -97,32 +97,16 @@ async function convertFileToPdf(inputPath, outputPath) {
   const extension = path.extname(inputPath).toLowerCase();
   await fs.mkdir(path.dirname(outputPath), { recursive: true });
 
-  // Best-quality route: use LibreOffice when available for Office/binary formats.
-  if (LIBREOFFICE_EXTENSIONS.has(extension)) {
-    try {
-      await tryLibreOfficeConversion(inputPath, outputPath);
-      return;
-    } catch (libreOfficeError) {
-      // Fall through to local conversion paths where supported.
-      console.warn("[Convert Warn] LibreOffice route failed, falling back:", libreOfficeError.message);
-    }
+  // Office formats should use LibreOffice only. If it fails, caller will keep original file.
+  if (STRICT_LIBREOFFICE_EXTENSIONS.has(extension)) {
+    await tryLibreOfficeConversion(inputPath, outputPath);
+    return;
   }
 
   if (TEXT_EXTENSIONS.has(extension)) {
     const text = await fs.readFile(inputPath, "utf8");
     await writeTextPdf(text, outputPath);
     return;
-  }
-
-  if (OFFICE_EXTENSIONS.has(extension)) {
-    try {
-      const ast = await officeParser.parseOffice(inputPath);
-      const extractedText = typeof ast?.toText === "function" ? ast.toText() : "";
-      await writeTextPdf(extractedText, outputPath);
-      return;
-    } catch (error) {
-      throw new Error(`Office parsing failed: ${error?.message || "Unknown parser error"}`);
-    }
   }
 
   if (IMAGE_EXTENSIONS.has(extension)) {

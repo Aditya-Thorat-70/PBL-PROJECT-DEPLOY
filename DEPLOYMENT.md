@@ -28,8 +28,10 @@ CORS_ORIGINS=https://your-frontend-domain.com
 Backend conversion now follows this order:
 
 1. Try LibreOffice conversion first (best layout/image preservation, supports `.ppt` and `.doc`).
-2. If LibreOffice fails/unavailable, fall back to local Node conversion for supported formats.
-3. If both fail, upload original file and return `conversionWarning`.
+2. For Office formats, do not use text-based fallback (to avoid messy PDF output).
+3. If LibreOffice fails, upload original file and return `conversionWarning`.
+
+Local Node conversion is used for non-Office formats like `.md`, `.txt`, and images.
 
 To maximize conversion success (target 7-8 out of 10+ files), deploy backend with LibreOffice installed (Render Docker using [backend/Dockerfile](backend/Dockerfile)).
 
