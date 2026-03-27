@@ -21,16 +21,16 @@ export default function PCDashboard({
   return (
     <div className="max-w-6xl mx-auto px-4 md:px-6 py-6">
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6">
         {stats.map((s, i) => (
           <div
             key={i}
-            className="bg-white rounded-2xl border border-gray-100 p-5 animate-fadeIn"
+            className="bg-white rounded-2xl border border-gray-100 p-4 sm:p-5 animate-fadeIn"
             style={{ animationDelay: `${i * 80}ms` }}
           >
             <div className="text-2xl mb-2">{s.icon}</div>
             <div
-              className="text-2xl font-extrabold bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent"
+              className="text-xl sm:text-2xl font-extrabold bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent break-words"
               style={{ fontFamily: "Syne, sans-serif" }}
             >
               {s.val}
@@ -44,9 +44,9 @@ export default function PCDashboard({
       <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-5">
         <QRCodeCard roomId={roomId} onGenerate={onGenerate} />
 
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-6">
           <div className="mb-5 flex flex-col gap-3">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <h2 className="font-extrabold text-xl text-gray-900" style={{ fontFamily: "Syne, sans-serif" }}>
                 Uploaded Files
               </h2>

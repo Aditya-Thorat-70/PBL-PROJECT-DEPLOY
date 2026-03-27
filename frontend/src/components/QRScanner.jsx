@@ -197,7 +197,7 @@ export default function QRScanner({ onRoomDetected }) {
         </button>
         <button
           onClick={() => imageInputRef.current?.click()}
-          className="ml-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all"
+          className="mt-2 sm:mt-0 sm:ml-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all"
         >
           Upload QR Image
         </button>
@@ -261,11 +261,11 @@ export default function QRScanner({ onRoomDetected }) {
         Make sure the QR code is clearly visible and well-lit
       </p>
 
-      <div className="mt-3 flex justify-center">
+      <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
         {cameraActive && (
           <button
             onClick={handleCloseCamera}
-            className="mr-2 px-3 py-2 rounded-lg text-xs font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all"
+            className="px-3 py-2 rounded-lg text-xs font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all"
           >
             Close Camera
           </button>

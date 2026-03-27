@@ -151,7 +151,7 @@ export default function UploadForm({ roomId: defaultRoom, onUpload, onComplete }
 
   if (loading) {
     return (
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sm:p-8">
         <Loader text="Sending to printer..." />
         <div className="mt-4 h-1.5 rounded-full bg-gray-100 overflow-hidden">
           <div
@@ -166,7 +166,7 @@ export default function UploadForm({ roomId: defaultRoom, onUpload, onComplete }
 
   if (success) {
     return (
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sm:p-8">
         <SuccessScreen
           fileCount={uploadedSummary.count}
           lastFileName={uploadedSummary.lastFileName}
@@ -180,7 +180,7 @@ export default function UploadForm({ roomId: defaultRoom, onUpload, onComplete }
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-7 animate-fadeIn">
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-7 animate-fadeIn">
       <h2 className="font-extrabold text-2xl text-gray-900 mb-1" style={{ fontFamily: "Syne, sans-serif" }}>
         Upload Document
       </h2>
@@ -194,7 +194,7 @@ export default function UploadForm({ roomId: defaultRoom, onUpload, onComplete }
       <div className="mb-6">
         <label className="block text-sm font-semibold text-gray-700 mb-1.5">Documents</label>
         <div
-          className={`rounded-2xl border-2 border-dashed p-10 text-center cursor-pointer transition-all ${
+          className={`rounded-2xl border-2 border-dashed p-6 sm:p-10 text-center cursor-pointer transition-all ${
             dragging
               ? "border-indigo-400 bg-indigo-50/50"
               : "border-gray-200 bg-white hover:border-indigo-300 hover:bg-indigo-50/30"
@@ -215,7 +215,7 @@ export default function UploadForm({ roomId: defaultRoom, onUpload, onComplete }
           {files.length ? (
             <div className="flex flex-col gap-2 max-h-52 overflow-auto">
               {files.map((selectedFile, index) => (
-                <div key={`${selectedFile.name}-${selectedFile.size}-${index}`} className="flex items-center gap-3 justify-between rounded-xl bg-gray-50 px-3 py-2 border border-gray-100">
+                <div key={`${selectedFile.name}-${selectedFile.size}-${index}`} className="flex items-center gap-2 sm:gap-3 justify-between rounded-xl bg-gray-50 px-2.5 sm:px-3 py-2 border border-gray-100">
                   <div className="flex items-center gap-3 min-w-0">
                     <span className="text-2xl">{fileIcon(selectedFile.name)}</span>
                     <div className="text-left min-w-0">
@@ -226,7 +226,7 @@ export default function UploadForm({ roomId: defaultRoom, onUpload, onComplete }
                     </div>
                   </div>
                   <button
-                    className="ml-2 px-2.5 py-1 rounded-lg text-xs font-medium text-gray-400 border border-gray-200 hover:bg-gray-100 transition-all"
+                    className="ml-1 sm:ml-2 px-2.5 py-1 rounded-lg text-xs font-medium text-gray-400 border border-gray-200 hover:bg-gray-100 transition-all"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleRemoveFile(index);
@@ -259,7 +259,7 @@ export default function UploadForm({ roomId: defaultRoom, onUpload, onComplete }
       <button
         onClick={handleSubmit}
         disabled={!files.length}
-        className="w-full py-4 rounded-2xl text-base font-semibold text-white bg-gradient-to-r from-cyan-500 to-indigo-600 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:translate-y-0"
+        className="w-full py-3.5 sm:py-4 rounded-2xl text-sm sm:text-base font-semibold text-white bg-gradient-to-r from-cyan-500 to-indigo-600 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:translate-y-0"
       >
         📤 Upload {files.length > 1 ? `${files.length} Files` : "File"} & Send to Printer
       </button>

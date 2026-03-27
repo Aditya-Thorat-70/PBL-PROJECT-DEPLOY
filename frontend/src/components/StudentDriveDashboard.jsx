@@ -31,10 +31,10 @@ const fileEmoji = (name = "") => {
 
 function EmptyState({ driveName, joinId, setDriveName, setJoinId, onCreateDrive, onJoinDrive, loading }) {
   return (
-    <div className="max-w-6xl mx-auto px-4 md:px-6 py-8">
-      <div className="rounded-3xl border border-gray-200 bg-gradient-to-br from-slate-50 via-white to-cyan-50/30 shadow-sm p-6 md:p-8">
+    <div className="max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-8">
+      <div className="rounded-3xl border border-gray-200 bg-gradient-to-br from-slate-50 via-white to-cyan-50/30 shadow-sm p-4 sm:p-6 md:p-8">
         <div className="text-center mb-8">
-          <h1 className="font-extrabold text-4xl text-gray-900 mb-2" style={{ fontFamily: "Syne, sans-serif" }}>
+          <h1 className="font-extrabold text-3xl sm:text-4xl text-gray-900 mb-2" style={{ fontFamily: "Syne, sans-serif" }}>
             Student Drive
           </h1>
           <p className="text-gray-600 text-sm">A shared classroom workspace for folders, documents, and text notes.</p>
@@ -96,24 +96,30 @@ function EmptyState({ driveName, joinId, setDriveName, setJoinId, onCreateDrive,
 
 function Sidebar({ folders, totalFiles, totalNotes }) {
   return (
-    <aside className="bg-slate-50 border-r border-gray-200 p-4">
+    <aside className="bg-slate-50 border-b md:border-b-0 md:border-r border-gray-200 p-4">
       <button className="w-full rounded-xl bg-white border border-gray-300 px-3 py-2 text-sm font-semibold text-gray-800 text-left shadow-sm">
         + New
       </button>
 
-      <div className="mt-4 space-y-1">
-        <div className="rounded-lg bg-cyan-100 text-cyan-900 text-sm font-semibold px-3 py-2">Home</div>
-        <div className="rounded-lg text-gray-700 text-sm px-3 py-2">My Drive</div>
-        <div className="rounded-lg text-gray-700 text-sm px-3 py-2">Shared</div>
+      <div className="mt-4 grid grid-cols-3 md:grid-cols-1 gap-1">
+        <div className="rounded-lg bg-cyan-100 text-cyan-900 text-xs sm:text-sm font-semibold px-2 sm:px-3 py-2 text-center md:text-left">Home</div>
+        <div className="rounded-lg text-gray-700 text-xs sm:text-sm px-2 sm:px-3 py-2 text-center md:text-left">My Drive</div>
+        <div className="rounded-lg text-gray-700 text-xs sm:text-sm px-2 sm:px-3 py-2 text-center md:text-left">Shared</div>
       </div>
 
-      <div className="mt-5 border-t border-gray-200 pt-4 space-y-2">
-        <div className="text-xs text-gray-500">Folders</div>
-        <div className="text-sm font-semibold text-gray-800">{folders}</div>
-        <div className="text-xs text-gray-500">Documents</div>
-        <div className="text-sm font-semibold text-gray-800">{totalFiles}</div>
-        <div className="text-xs text-gray-500">Text Notes</div>
-        <div className="text-sm font-semibold text-gray-800">{totalNotes}</div>
+      <div className="mt-5 border-t border-gray-200 pt-4 grid grid-cols-3 md:grid-cols-1 gap-2 md:space-y-2">
+        <div className="rounded-lg bg-white border border-gray-200 px-2 py-2 md:p-0 md:bg-transparent md:border-0">
+          <div className="text-[11px] text-gray-500">Folders</div>
+          <div className="text-sm font-semibold text-gray-800">{folders}</div>
+        </div>
+        <div className="rounded-lg bg-white border border-gray-200 px-2 py-2 md:p-0 md:bg-transparent md:border-0">
+          <div className="text-[11px] text-gray-500">Documents</div>
+          <div className="text-sm font-semibold text-gray-800">{totalFiles}</div>
+        </div>
+        <div className="rounded-lg bg-white border border-gray-200 px-2 py-2 md:p-0 md:bg-transparent md:border-0">
+          <div className="text-[11px] text-gray-500">Text Notes</div>
+          <div className="text-sm font-semibold text-gray-800">{totalNotes}</div>
+        </div>
       </div>
     </aside>
   );
@@ -382,13 +388,13 @@ export default function StudentDriveDashboard({ toast }) {
   }
 
   return (
-    <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-6">
+    <div className="max-w-[1400px] mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6">
       <div className="rounded-3xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-        <div className="grid grid-cols-1 md:grid-cols-[240px_1fr] min-h-[720px]">
+        <div className="grid grid-cols-1 md:grid-cols-[240px_1fr] min-h-0 md:min-h-[720px]">
           <Sidebar folders={drive.folders.length} totalFiles={totalFiles} totalNotes={totalNotes} />
 
           <main className="bg-white">
-            <div className="p-4 border-b border-gray-200 flex flex-col lg:flex-row gap-3 lg:items-center lg:justify-between">
+            <div className="p-3 sm:p-4 border-b border-gray-200 flex flex-col lg:flex-row gap-3 lg:items-center lg:justify-between">
               <div className="w-full max-w-2xl">
                 <input
                   value={search}
@@ -398,8 +404,8 @@ export default function StudentDriveDashboard({ toast }) {
                 />
               </div>
 
-              <div className="flex items-center flex-wrap gap-2">
-                <div className="px-3 py-2 rounded-xl bg-cyan-50 border border-cyan-200 text-xs font-bold tracking-widest text-cyan-900" style={{ fontFamily: "Syne, sans-serif" }}>
+              <div className="flex items-center flex-wrap gap-2 justify-start lg:justify-end">
+                <div className="px-2.5 sm:px-3 py-2 rounded-xl bg-cyan-50 border border-cyan-200 text-[11px] sm:text-xs font-bold tracking-widest text-cyan-900" style={{ fontFamily: "Syne, sans-serif" }}>
                   {drive.driveId}
                 </div>
                 <button
@@ -417,9 +423,9 @@ export default function StudentDriveDashboard({ toast }) {
               </div>
             </div>
 
-            <div className="p-5 space-y-6">
+            <div className="p-3 sm:p-5 space-y-6">
               <section>
-                <h1 className="font-extrabold text-3xl text-gray-900" style={{ fontFamily: "Syne, sans-serif" }}>
+                <h1 className="font-extrabold text-2xl sm:text-3xl text-gray-900 break-words" style={{ fontFamily: "Syne, sans-serif" }}>
                   Welcome to {drive.name}
                 </h1>
                 <p className="text-sm text-gray-500 mt-1">
@@ -474,7 +480,7 @@ export default function StudentDriveDashboard({ toast }) {
               <section>
                 <h2 className="font-semibold text-gray-800 mb-3">Documents</h2>
                 <div className="rounded-2xl border border-gray-200 overflow-hidden">
-                  <div className="grid grid-cols-[1.7fr_1fr_0.9fr_0.9fr_0.8fr] bg-slate-50 px-4 py-2 text-xs font-semibold text-gray-600">
+                  <div className="hidden md:grid grid-cols-[1.7fr_1fr_0.9fr_0.9fr_0.8fr] bg-slate-50 px-4 py-2 text-xs font-semibold text-gray-600">
                     <div>Name</div>
                     <div>Folder</div>
                     <div>Type</div>
@@ -485,25 +491,50 @@ export default function StudentDriveDashboard({ toast }) {
                   {filteredFiles.length === 0 ? (
                     <div className="px-4 py-8 text-sm text-gray-500 text-center">No documents match your search.</div>
                   ) : (
-                    <div className="max-h-[320px] overflow-auto">
-                      {filteredFiles.map((file) => (
-                        <a
-                          key={file.id}
-                          href={file.viewUrl || "#"}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="grid grid-cols-[1.7fr_1fr_0.9fr_0.9fr_0.8fr] px-4 py-3 border-t border-gray-100 text-sm hover:bg-slate-50"
-                        >
-                          <div className="font-medium text-gray-800 truncate">
-                            <span className="mr-2">{fileEmoji(file.name)}</span>
-                            {file.name}
-                          </div>
-                          <div className="text-gray-600 truncate">{file.folderName}</div>
-                          <div className="text-gray-600 uppercase text-xs">{(file.mimeType || "file").split("/").pop()}</div>
-                          <div className="text-gray-600">{formatSize(file.size || 0)}</div>
-                          <div className="text-gray-500">{prettyDate(file.uploadedAt)}</div>
-                        </a>
-                      ))}
+                    <div className="max-h-[360px] overflow-auto">
+                      <div className="md:hidden divide-y divide-gray-100">
+                        {filteredFiles.map((file) => (
+                          <a
+                            key={file.id}
+                            href={file.viewUrl || "#"}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block px-3 py-3 hover:bg-slate-50"
+                          >
+                            <div className="font-medium text-gray-800 truncate">
+                              <span className="mr-2">{fileEmoji(file.name)}</span>
+                              {file.name}
+                            </div>
+                            <div className="mt-1 text-xs text-gray-500 flex flex-wrap gap-x-3 gap-y-1">
+                              <span>Folder: {file.folderName}</span>
+                              <span>Type: {(file.mimeType || "file").split("/").pop()?.toUpperCase()}</span>
+                              <span>Size: {formatSize(file.size || 0)}</span>
+                              <span>Added: {prettyDate(file.uploadedAt)}</span>
+                            </div>
+                          </a>
+                        ))}
+                      </div>
+
+                      <div className="hidden md:block">
+                        {filteredFiles.map((file) => (
+                          <a
+                            key={file.id}
+                            href={file.viewUrl || "#"}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="grid grid-cols-[1.7fr_1fr_0.9fr_0.9fr_0.8fr] px-4 py-3 border-t border-gray-100 text-sm hover:bg-slate-50"
+                          >
+                            <div className="font-medium text-gray-800 truncate">
+                              <span className="mr-2">{fileEmoji(file.name)}</span>
+                              {file.name}
+                            </div>
+                            <div className="text-gray-600 truncate">{file.folderName}</div>
+                            <div className="text-gray-600 uppercase text-xs">{(file.mimeType || "file").split("/").pop()}</div>
+                            <div className="text-gray-600">{formatSize(file.size || 0)}</div>
+                            <div className="text-gray-500">{prettyDate(file.uploadedAt)}</div>
+                          </a>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
