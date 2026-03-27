@@ -148,26 +148,31 @@ export default function App() {
   };
 
   const handleUpload = async (selectedFile, selectedRoomId) => {
-    let targetRoomId = (selectedRoomId || "").toUpperCase().trim();
+    try {
+      let targetRoomId = (selectedRoomId || "").toUpperCase().trim();
 
-    if (!targetRoomId) {
-      targetRoomId = await createRoom();
-      toast(`Room created: ${targetRoomId}`, "info");
+      if (!targetRoomId) {
+        targetRoomId = await createRoom();
+        toast(`Room created: ${targetRoomId}`, "info");
+      }
+
+      const uploadedFile = await uploadFileToRoom({ roomId: targetRoomId, file: selectedFile, uploadSource: "mobile" });
+
+      setRoomFiles((prev) => ({
+        ...prev,
+        [targetRoomId]: [uploadedFile, ...(prev[targetRoomId] || [])],
+      }));
+
+      if (roomId === targetRoomId) {
+        await loadRoomFiles(targetRoomId);
+      }
+
+      toast(`${uploadedFile.name} uploaded to room ${targetRoomId}`, "success");
+      return uploadedFile;
+    } catch (error) {
+      toast(error?.message || "Upload failed. Please try again.", "error");
+      throw error;
     }
-
-    const uploadedFile = await uploadFileToRoom({ roomId: targetRoomId, file: selectedFile, uploadSource: "mobile" });
-
-    setRoomFiles((prev) => ({
-      ...prev,
-      [targetRoomId]: [uploadedFile, ...(prev[targetRoomId] || [])],
-    }));
-
-    if (roomId === targetRoomId) {
-      await loadRoomFiles(targetRoomId);
-    }
-
-    toast(`${uploadedFile.name} uploaded to room ${targetRoomId}`, "success");
-    return uploadedFile;
   };
 
   const status = appMode === "student-drive" ? "Active" : files.length > 0 ? "Active" : "Waiting";
