@@ -9,7 +9,6 @@ Create `backend/.env` from `backend/.env.example` and set:
 - `MONGO_URI` (required)
 - `MAX_UPLOAD_SIZE_MB` (optional)
 - `FILE_RETENTION_HOURS` (optional)
-- `LIBREOFFICE_PATH` (optional but recommended): path to `soffice` binary
 - `CORS_ORIGINS` (required in production): comma-separated frontend origins
 
 Example:
@@ -19,22 +18,14 @@ PORT=5000
 MONGO_URI=mongodb+srv://<username>:<password>@<cluster-host>/<db-name>
 MAX_UPLOAD_SIZE_MB=50
 FILE_RETENTION_HOURS=3
-LIBREOFFICE_PATH=/usr/bin/soffice
 CORS_ORIGINS=https://your-frontend-domain.com
 ```
 
-### Important for PDF conversion on Render
+### Important for PDF conversion behavior
 
-If you need DOC/DOCX/PPT/PPTX/TXT/image to PDF conversion in production, deploy backend as a **Docker service** so LibreOffice is installed.
+The backend now uses a pure Node conversion pipeline for supported formats (for example `.docx`, `.pptx`, `.xlsx`, `.txt`, `.png`, `.jpg`) and does not require LibreOffice.
 
-- Use [backend/Dockerfile](backend/Dockerfile) for Render backend deployment.
-- In Render service settings:
-	- Environment: Docker
-	- Dockerfile path: `backend/Dockerfile`
-	- Auto deploy: enabled
-- Keep `LIBREOFFICE_PATH=/usr/bin/soffice` in backend env vars.
-
-Without LibreOffice on the server, non-PDF uploads will fail conversion by design.
+If conversion is not possible for a given file, the original file is uploaded instead and the API returns a `conversionWarning`.
 
 ### Backend build/start commands
 
@@ -43,6 +34,8 @@ cd backend
 npm install
 npm start
 ```
+
+Use Node.js 20.19+ for backend deployment so conversion dependencies install cleanly.
 
 ### Backend readiness checks
 
@@ -88,7 +81,8 @@ Deploy the `frontend/dist` output to your static hosting provider.
 - Upload a file from mobile and verify it appears in PC dashboard.
 - Confirm real-time updates (Socket.IO) work.
 - Open uploaded file preview URL and print/download URL.
-- Upload `.docx`, `.pptx`, or `.txt` and verify the stored file is converted to `.pdf`.
+- Upload `.docx`, `.pptx`, or `.txt` and verify PDF conversion for supported content.
+- Upload edge-case files and confirm upload still succeeds even if a conversion warning appears.
 
 ## Notes
 

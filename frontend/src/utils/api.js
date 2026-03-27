@@ -61,7 +61,10 @@ export const uploadFileToRoom = async ({ roomId, file, uploadSource = "mobile" }
   await ensureOk(response);
 
   const data = await response.json();
-  return mapBackendFile(data.file);
+  return {
+    ...mapBackendFile(data.file),
+    conversionWarning: data.conversionWarning || null,
+  };
 };
 
 const mapStudentDrive = (drive) => ({

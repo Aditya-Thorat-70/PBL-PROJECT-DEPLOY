@@ -168,6 +168,9 @@ export default function App() {
       }
 
       toast(`${uploadedFile.name} uploaded to room ${targetRoomId}`, "success");
+      if (uploadedFile?.conversionWarning) {
+        toast(uploadedFile.conversionWarning, "info");
+      }
       return uploadedFile;
     } catch (error) {
       toast(error?.message || "Upload failed. Please try again.", "error");
