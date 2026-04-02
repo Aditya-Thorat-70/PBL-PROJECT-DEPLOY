@@ -1,10 +1,12 @@
 import { useMemo, useState } from "react";
 import QRCodeCard from "./QRCodeCard";
 import FileList from "./FileList";
+import SessionTimer from "./SessionTimer";
 
 export default function PCDashboard({
   files,
   roomId,
+  roomExpiresAt,
   roomInput,
   onRoomInputChange,
   onOpenRoom,
@@ -91,6 +93,12 @@ export default function PCDashboard({
                 Open Room
               </button>
             </div>
+
+            {roomExpiresAt && (
+              <div className="pt-1">
+                <SessionTimer expiresAt={roomExpiresAt} roomId={roomId} compact />
+              </div>
+            )}
           </div>
           <FileList files={files} onDelete={onDelete} onView={onView} onPrint={onPrint} />
         </div>

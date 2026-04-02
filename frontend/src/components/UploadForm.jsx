@@ -1,10 +1,11 @@
 import { useEffect, useState, useRef } from "react";
 import Loader from "./Loader";
 import { fileIcon, formatSize } from "../utils/helpers";
+import SessionTimer from "./SessionTimer";
 
 const MAX_UPLOAD_MB = Number(import.meta.env.VITE_MAX_UPLOAD_SIZE_MB || 50);
 
-function SuccessScreen({ fileCount, lastFileName, roomId, copied, onCopyRoom, onReset }) {
+function SuccessScreen({ fileCount, lastFileName, roomId, roomExpiresAt, copied, onCopyRoom, onReset }) {
   return (
     <div className="flex flex-col items-center gap-5 text-center py-10 animate-fadeIn">
       <div className="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-500 to-green-400 flex items-center justify-center text-4xl shadow-lg shadow-emerald-200 animate-fadeIn">
@@ -42,6 +43,7 @@ function SuccessScreen({ fileCount, lastFileName, roomId, copied, onCopyRoom, on
           </div>
         </div>
       )}
+      {roomExpiresAt && <SessionTimer expiresAt={roomExpiresAt} roomId={roomId} />}
       <button
         onClick={onReset}
         className="w-full py-3.5 rounded-2xl text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-violet-600 hover:shadow-lg hover:-translate-y-0.5 transition-all"
@@ -61,6 +63,7 @@ export default function UploadForm({ roomId: defaultRoom, onUpload, onComplete }
   const [success, setSuccess] = useState(false);
   const [copied, setCopied] = useState(false);
   const [uploadedSummary, setUploadedSummary] = useState({ count: 0, lastFileName: "" });
+  const [roomExpiresAt, setRoomExpiresAt] = useState(null);
   const inputRef = useRef();
 
   useEffect(() => {
@@ -104,6 +107,10 @@ export default function UploadForm({ roomId: defaultRoom, onUpload, onComplete }
           setRoom(uploaded.room);
         }
 
+        if (uploaded?.roomExpiresAt) {
+          setRoomExpiresAt(uploaded.roomExpiresAt);
+        }
+
         setProgress(Math.round(((index + 1) / files.length) * 100));
       }
 
@@ -121,6 +128,7 @@ export default function UploadForm({ roomId: defaultRoom, onUpload, onComplete }
     setSuccess(false);
     setCopied(false);
     setUploadedSummary({ count: 0, lastFileName: "" });
+    setRoomExpiresAt(null);
     setRoom(defaultRoom || "");
     setProgress(0);
 
@@ -171,6 +179,7 @@ export default function UploadForm({ roomId: defaultRoom, onUpload, onComplete }
           fileCount={uploadedSummary.count}
           lastFileName={uploadedSummary.lastFileName}
           roomId={room}
+          roomExpiresAt={roomExpiresAt}
           copied={copied}
           onCopyRoom={copyRoomId}
           onReset={reset}

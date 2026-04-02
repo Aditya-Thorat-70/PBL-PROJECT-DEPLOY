@@ -19,6 +19,7 @@ export const mapBackendFile = (file) => ({
   name: file.originalName || file.fileName,
   size: file.fileSize || 0,
   uploadedAt: file.uploadedAt ? new Date(file.uploadedAt) : new Date(),
+  expiresAt: file.expiresAt ? new Date(file.expiresAt) : null,
   room: file.roomId,
   downloadUrl: `${API_BASE_URL}/api/files/download/${file._id}`,
   viewUrl: file.fileName ? `${API_BASE_URL}/uploads/${file.fileName}` : null,
@@ -45,6 +46,19 @@ export const createRoom = async () => {
 
   const data = await response.json();
   return data.roomId;
+};
+
+export const fetchRoomById = async (roomId) => {
+  const response = await fetch(`${API_BASE_URL}/api/rooms/${encodeURIComponent(roomId)}`);
+  await ensureOk(response);
+
+  const data = await response.json();
+  return {
+    roomId: data.roomId,
+    createdAt: data.createdAt,
+    expiresAt: data.expiresAt,
+    isActive: data.isActive,
+  };
 };
 
 export const uploadFileToRoom = async ({ roomId, file, uploadSource = "mobile" }) => {

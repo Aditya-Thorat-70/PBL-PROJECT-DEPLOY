@@ -7,7 +7,7 @@ import StudentDriveDashboard from "./components/StudentDriveDashboard";
 import ToastContainer from "./components/Toast";
 import { useToast } from "./hooks/useToast";
 import { generateRoomId } from "./utils/helpers";
-import { createRoom, fetchFilesByRoom, uploadFileToRoom } from "./utils/api";
+import { createRoom, fetchFilesByRoom, fetchRoomById, uploadFileToRoom } from "./utils/api";
 import { SOCKET_URL } from "./utils/config";
 
 export default function App() {
@@ -18,6 +18,7 @@ export default function App() {
   const [roomInput, setRoomInput] = useState(initialRoomId);
   const [mobilePrefillRoomId, setMobilePrefillRoomId] = useState(null);
   const [roomFiles, setRoomFiles] = useState({ [initialRoomId]: [] });
+  const [roomExpiryById, setRoomExpiryById] = useState({});
   const [socket, setSocket] = useState(null);
   const { toasts, toast, removeToast } = useToast();
 
@@ -95,6 +96,27 @@ export default function App() {
     }
   };
 
+  const loadRoomSession = async (nextRoomId) => {
+    const roomData = await fetchRoomById(nextRoomId);
+    setRoomExpiryById((prev) => ({
+      ...prev,
+      [nextRoomId]: roomData.expiresAt,
+    }));
+    return roomData;
+  };
+
+  const getExpiryFromFiles = (fileList) => {
+    const expiryCandidates = (fileList || [])
+      .map((file) => (file?.expiresAt ? new Date(file.expiresAt).getTime() : null))
+      .filter((value) => Number.isFinite(value));
+
+    if (!expiryCandidates.length) {
+      return null;
+    }
+
+    return new Date(Math.max(...expiryCandidates)).toISOString();
+  };
+
   const handleGenerate = () => {
     const newRoomId = generateRoomId();
     setRoomId(newRoomId);
@@ -112,7 +134,17 @@ export default function App() {
     }
 
     try {
-      await loadRoomFiles(nextRoomId);
+      const fetchedFiles = await loadRoomFiles(nextRoomId);
+
+      try {
+        await loadRoomSession(nextRoomId);
+      } catch {
+        const fallbackExpiry = getExpiryFromFiles(fetchedFiles);
+        if (fallbackExpiry) {
+          setRoomExpiryById((prev) => ({ ...prev, [nextRoomId]: fallbackExpiry }));
+        }
+      }
+
       setRoomId(nextRoomId);
       toast(`Opened room ${nextRoomId}`, "info");
     } catch (error) {
@@ -158,6 +190,16 @@ export default function App() {
 
       const uploadedFile = await uploadFileToRoom({ roomId: targetRoomId, file: selectedFile, uploadSource: "mobile" });
 
+      let roomSession = null;
+      try {
+        roomSession = await loadRoomSession(targetRoomId);
+      } catch {
+        const fallbackExpiry = uploadedFile?.expiresAt ? new Date(uploadedFile.expiresAt).toISOString() : null;
+        if (fallbackExpiry) {
+          setRoomExpiryById((prev) => ({ ...prev, [targetRoomId]: fallbackExpiry }));
+        }
+      }
+
       setRoomFiles((prev) => ({
         ...prev,
         [targetRoomId]: [uploadedFile, ...(prev[targetRoomId] || [])],
@@ -171,7 +213,10 @@ export default function App() {
       if (uploadedFile?.conversionWarning) {
         toast(uploadedFile.conversionWarning, "info");
       }
-      return uploadedFile;
+      return {
+        ...uploadedFile,
+        roomExpiresAt: roomSession?.expiresAt || uploadedFile?.expiresAt || null,
+      };
     } catch (error) {
       toast(error?.message || "Upload failed. Please try again.", "error");
       throw error;
@@ -199,6 +244,7 @@ export default function App() {
               <PCDashboard
                 files={files}
                 roomId={roomId}
+                roomExpiresAt={roomExpiryById[roomId] || null}
                 roomInput={roomInput}
                 onRoomInputChange={setRoomInput}
                 onOpenRoom={handleOpenRoom}

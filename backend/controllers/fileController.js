@@ -1,4 +1,5 @@
 const File = require("../models/File");
+const Room = require("../models/Room");
 const path = require("path");
 const fs = require("fs");
 const fsPromises = require("fs/promises");
@@ -7,6 +8,11 @@ const { convertFileToPdf } = require("../utils/convertToPdf");
 exports.uploadFile = async (req, res) => {
   try {
     const { roomId, uploadSource } = req.body;
+    const normalizedRoomId = String(roomId || "").toUpperCase().trim();
+
+    if (!normalizedRoomId) {
+      return res.status(400).json({ message: "Room ID is required" });
+    }
 
     if (!req.file) {
       return res.status(400).json({ message: "No file uploaded" });
@@ -44,8 +50,19 @@ exports.uploadFile = async (req, res) => {
 
     const expiresAt = new Date(Date.now() + 3 * 60 * 60 * 1000); // 3 hours from now
 
+    await Room.updateOne(
+      { roomId: normalizedRoomId },
+      {
+        $setOnInsert: {
+          roomId: normalizedRoomId,
+          expiresAt,
+        },
+      },
+      { upsert: true }
+    );
+
     const newFile = await File.create({
-      roomId,
+      roomId: normalizedRoomId,
       fileName,
       originalName,
       filePath,
@@ -57,7 +74,7 @@ exports.uploadFile = async (req, res) => {
 
     // Emit real-time event to all clients in the room
     const io = req.app.get('io');
-    io.to(roomId).emit('file-uploaded', {
+    io.to(normalizedRoomId).emit('file-uploaded', {
       file: newFile,
       message: 'New file uploaded'
     });
