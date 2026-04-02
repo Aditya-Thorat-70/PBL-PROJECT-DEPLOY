@@ -8,7 +8,7 @@ export default function QRCodeCard({ roomId, onGenerate, showRoomId = false }) {
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 flex flex-col items-center gap-5">
       <div className="text-center">
-        <h2 className="font-extrabold text-xl text-gray-900 mb-1" style={{ fontFamily: "Syne, sans-serif" }}>
+        <h2 className="font-extrabold text-xl text-gray-900 mb-1" style={{ fontFamily: "Plus Jakarta Sans, Segoe UI, sans-serif" }}>
           Scan to Upload
         </h2>
         <p className="text-sm text-gray-500">Point your phone camera at the QR code</p>
@@ -23,8 +23,7 @@ export default function QRCodeCard({ roomId, onGenerate, showRoomId = false }) {
       <div className="text-center">
         <div className="text-xs text-gray-400 uppercase tracking-widest font-semibold mb-1">Room ID</div>
         <div
-          className="text-3xl font-extrabold tracking-[0.18em] bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent"
-          style={{ fontFamily: "Syne, sans-serif" }}
+          className="font-room-code text-3xl font-extrabold tracking-[0.18em] bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent"
         >
           {displayedRoomId}
         </div>

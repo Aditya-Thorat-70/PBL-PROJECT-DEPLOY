@@ -51,7 +51,7 @@ export default function SessionTimer({ expiresAt, roomId, compact = false }) {
         }`}
       >
         <span>{isExpired ? "Session expired" : "Session time left"}</span>
-        {!isExpired && <span className="font-extrabold tracking-wide">{formatTimeLeft(timeLeftMs)}</span>}
+        {!isExpired && <span className="font-room-code font-extrabold tracking-wide">{formatTimeLeft(timeLeftMs)}</span>}
       </div>
     );
   }
@@ -59,9 +59,9 @@ export default function SessionTimer({ expiresAt, roomId, compact = false }) {
   return (
     <div className={`w-full rounded-xl border px-4 py-3 ${isExpired ? "border-red-200 bg-red-50" : "border-amber-200 bg-amber-50"}`}>
       <div className={`text-xs font-semibold uppercase tracking-wide ${isExpired ? "text-red-600" : "text-amber-700"}`}>
-        Room Session Timer{roomId ? ` (${roomId})` : ""}
+        Room Session Timer{roomId ? <span className="font-room-code"> ({roomId})</span> : ""}
       </div>
-      <div className={`mt-1 text-lg font-extrabold ${isExpired ? "text-red-700" : "text-amber-900"}`} style={{ fontFamily: "Syne, sans-serif" }}>
+      <div className={`font-room-code mt-1 text-lg font-extrabold ${isExpired ? "text-red-700" : "text-amber-900"}`}>
         {isExpired ? "Session expired" : formatTimeLeft(timeLeftMs)}
       </div>
       <div className={`mt-1 text-xs ${isExpired ? "text-red-600" : "text-amber-700"}`}>

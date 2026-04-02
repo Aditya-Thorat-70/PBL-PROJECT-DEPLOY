@@ -136,6 +136,11 @@ export default function App() {
     try {
       const fetchedFiles = await loadRoomFiles(nextRoomId);
 
+      if (!fetchedFiles.length) {
+        toast("Invalid Room ID. No documents found in this room.", "error");
+        return;
+      }
+
       try {
         await loadRoomSession(nextRoomId);
       } catch {

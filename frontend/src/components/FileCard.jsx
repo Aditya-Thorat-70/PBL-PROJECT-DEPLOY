@@ -12,7 +12,7 @@ export default function FileCard({ file, onDelete, onView, onPrint }) {
       <div className="flex-1 min-w-0">
         <div
           className="font-semibold text-sm text-gray-900 truncate"
-          style={{ fontFamily: "Syne, sans-serif" }}
+          style={{ fontFamily: "Plus Jakarta Sans, Segoe UI, sans-serif" }}
         >
           {file.name}
         </div>

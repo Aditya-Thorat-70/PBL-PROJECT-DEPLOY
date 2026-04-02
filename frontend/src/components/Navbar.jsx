@@ -8,7 +8,7 @@ export default function Navbar({ appMode, setAppMode, view, setView, status, onR
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-violet-600 flex items-center justify-center text-lg shadow-md">
               🖨️
             </div>
-            <span className="font-extrabold text-lg sm:text-xl tracking-tight text-gray-900 truncate" style={{ fontFamily: "Syne, sans-serif" }}>
+            <span className="font-extrabold text-lg sm:text-xl tracking-tight text-gray-900 truncate" style={{ fontFamily: "Plus Jakarta Sans, Segoe UI, sans-serif" }}>
               QuickPrint
             </span>
           </div>
@@ -35,7 +35,7 @@ export default function Navbar({ appMode, setAppMode, view, setView, status, onR
               className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${
                 appMode === "quickprint" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
               }`}
-              style={{ fontFamily: "Syne, sans-serif" }}
+              style={{ fontFamily: "Plus Jakarta Sans, Segoe UI, sans-serif" }}
             >
               QuickPrint
             </button>
@@ -44,7 +44,7 @@ export default function Navbar({ appMode, setAppMode, view, setView, status, onR
               className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${
                 appMode === "student-drive" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
               }`}
-              style={{ fontFamily: "Syne, sans-serif" }}
+              style={{ fontFamily: "Plus Jakarta Sans, Segoe UI, sans-serif" }}
             >
               Student Drive
             </button>
@@ -58,7 +58,7 @@ export default function Navbar({ appMode, setAppMode, view, setView, status, onR
                 className={`flex-1 sm:flex-none px-3 sm:px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${
                   view === "pc" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
                 }`}
-                style={{ fontFamily: "Syne, sans-serif" }}
+                style={{ fontFamily: "Plus Jakarta Sans, Segoe UI, sans-serif" }}
               >
                 🖥 PC
               </button>
@@ -67,7 +67,7 @@ export default function Navbar({ appMode, setAppMode, view, setView, status, onR
                 className={`flex-1 sm:flex-none px-3 sm:px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${
                   view === "mobile" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
                 }`}
-                style={{ fontFamily: "Syne, sans-serif" }}
+                style={{ fontFamily: "Plus Jakarta Sans, Segoe UI, sans-serif" }}
               >
                 📱 Mobile
               </button>
@@ -92,7 +92,7 @@ export default function Navbar({ appMode, setAppMode, view, setView, status, onR
           className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
             appMode === "quickprint" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500"
           }`}
-          style={{ fontFamily: "Syne, sans-serif" }}
+          style={{ fontFamily: "Plus Jakarta Sans, Segoe UI, sans-serif" }}
         >
           QuickPrint
         </button>
@@ -101,7 +101,7 @@ export default function Navbar({ appMode, setAppMode, view, setView, status, onR
           className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
             appMode === "student-drive" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500"
           }`}
-          style={{ fontFamily: "Syne, sans-serif" }}
+          style={{ fontFamily: "Plus Jakarta Sans, Segoe UI, sans-serif" }}
         >
           Drive
         </button>

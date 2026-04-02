@@ -185,7 +185,7 @@ export default function QRScanner({ onRoomDetected }) {
         <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center text-3xl mx-auto mb-4">
           ❌
         </div>
-        <h2 className="font-extrabold text-xl text-gray-900 mb-2" style={{ fontFamily: "Syne, sans-serif" }}>
+        <h2 className="font-extrabold text-xl text-gray-900 mb-2" style={{ fontFamily: "Plus Jakarta Sans, Segoe UI, sans-serif" }}>
           Camera Access Required
         </h2>
         <p className="text-sm text-gray-500 mb-6">{error}</p>
@@ -214,7 +214,7 @@ export default function QRScanner({ onRoomDetected }) {
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-      <h2 className="font-extrabold text-xl text-gray-900 mb-3 text-center" style={{ fontFamily: "Syne, sans-serif" }}>
+      <h2 className="font-extrabold text-xl text-gray-900 mb-3 text-center" style={{ fontFamily: "Plus Jakarta Sans, Segoe UI, sans-serif" }}>
         Scan QR Code
       </h2>
       <p className="text-sm text-gray-500 text-center mb-4">

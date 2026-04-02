@@ -34,7 +34,7 @@ function EmptyState({ driveName, joinId, setDriveName, setJoinId, onCreateDrive,
     <div className="max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-8">
       <div className="rounded-3xl border border-gray-200 bg-gradient-to-br from-slate-50 via-white to-cyan-50/30 shadow-sm p-4 sm:p-6 md:p-8">
         <div className="text-center mb-8">
-          <h1 className="font-extrabold text-3xl sm:text-4xl text-gray-900 mb-2" style={{ fontFamily: "Syne, sans-serif" }}>
+          <h1 className="font-extrabold text-3xl sm:text-4xl text-gray-900 mb-2" style={{ fontFamily: "Plus Jakarta Sans, Segoe UI, sans-serif" }}>
             Student Drive
           </h1>
           <p className="text-gray-600 text-sm">A shared classroom workspace for folders, documents, and text notes.</p>
@@ -42,7 +42,7 @@ function EmptyState({ driveName, joinId, setDriveName, setJoinId, onCreateDrive,
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-            <h2 className="font-extrabold text-xl text-gray-900 mb-1" style={{ fontFamily: "Syne, sans-serif" }}>
+            <h2 className="font-extrabold text-xl text-gray-900 mb-1" style={{ fontFamily: "Plus Jakarta Sans, Segoe UI, sans-serif" }}>
               Create New Drive
             </h2>
             <p className="text-sm text-gray-500 mb-4">Generate a drive ID and share it with classmates.</p>
@@ -65,7 +65,7 @@ function EmptyState({ driveName, joinId, setDriveName, setJoinId, onCreateDrive,
           </div>
 
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-            <h2 className="font-extrabold text-xl text-gray-900 mb-1" style={{ fontFamily: "Syne, sans-serif" }}>
+            <h2 className="font-extrabold text-xl text-gray-900 mb-1" style={{ fontFamily: "Plus Jakarta Sans, Segoe UI, sans-serif" }}>
               Join Existing Drive
             </h2>
             <p className="text-sm text-gray-500 mb-4">Enter a Drive ID and continue where your team left off.</p>
@@ -77,7 +77,7 @@ function EmptyState({ driveName, joinId, setDriveName, setJoinId, onCreateDrive,
               maxLength={8}
               placeholder="Enter Drive ID"
               className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-sm font-bold tracking-widest text-gray-900 bg-white focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100 transition-all"
-              style={{ fontFamily: "Syne, sans-serif" }}
+              style={{ fontFamily: "Plus Jakarta Sans, Segoe UI, sans-serif" }}
             />
 
             <button
@@ -129,7 +129,7 @@ function FolderCard({ folder, draft, setNoteDrafts, onUpload, onAddNote, loading
   return (
     <div className="rounded-2xl border border-gray-200 bg-white p-4">
       <div className="flex items-center justify-between mb-2">
-        <h3 className="font-extrabold text-lg text-gray-900" style={{ fontFamily: "Syne, sans-serif" }}>
+        <h3 className="font-extrabold text-lg text-gray-900" style={{ fontFamily: "Plus Jakarta Sans, Segoe UI, sans-serif" }}>
           {folder.name}
         </h3>
         <span className="text-xs text-gray-500">
@@ -405,7 +405,7 @@ export default function StudentDriveDashboard({ toast }) {
               </div>
 
               <div className="flex items-center flex-wrap gap-2 justify-start lg:justify-end">
-                <div className="px-2.5 sm:px-3 py-2 rounded-xl bg-cyan-50 border border-cyan-200 text-[11px] sm:text-xs font-bold tracking-widest text-cyan-900" style={{ fontFamily: "Syne, sans-serif" }}>
+                <div className="px-2.5 sm:px-3 py-2 rounded-xl bg-cyan-50 border border-cyan-200 text-[11px] sm:text-xs font-bold tracking-widest text-cyan-900" style={{ fontFamily: "Plus Jakarta Sans, Segoe UI, sans-serif" }}>
                   {drive.driveId}
                 </div>
                 <button
@@ -425,7 +425,7 @@ export default function StudentDriveDashboard({ toast }) {
 
             <div className="p-3 sm:p-5 space-y-6">
               <section>
-                <h1 className="font-extrabold text-2xl sm:text-3xl text-gray-900 break-words" style={{ fontFamily: "Syne, sans-serif" }}>
+                <h1 className="font-extrabold text-2xl sm:text-3xl text-gray-900 break-words" style={{ fontFamily: "Plus Jakarta Sans, Segoe UI, sans-serif" }}>
                   Welcome to {drive.name}
                 </h1>
                 <p className="text-sm text-gray-500 mt-1">

@@ -6,7 +6,7 @@ function EmptyState() {
       <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-4xl">
         🗂️
       </div>
-      <h3 className="font-bold text-lg text-gray-700" style={{ fontFamily: "Syne, sans-serif" }}>
+      <h3 className="font-bold text-lg text-gray-700" style={{ fontFamily: "Plus Jakarta Sans, Segoe UI, sans-serif" }}>
         No files yet
       </h3>
       <p className="text-sm max-w-xs text-center">

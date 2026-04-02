@@ -36,8 +36,9 @@ export default function PCDashboard({
           >
             <div className="text-2xl mb-2">{s.icon}</div>
             <div
-              className="text-xl sm:text-2xl font-extrabold bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent break-words"
-              style={{ fontFamily: "Syne, sans-serif" }}
+              className={`text-xl sm:text-2xl font-extrabold bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent break-words ${
+                s.label === "Room ID" ? "font-room-code tracking-[0.14em]" : ""
+              }`}
             >
               {s.val}
             </div>
@@ -53,7 +54,7 @@ export default function PCDashboard({
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-6">
           <div className="mb-5 flex flex-col gap-3">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-              <h2 className="font-extrabold text-xl text-gray-900" style={{ fontFamily: "Syne, sans-serif" }}>
+              <h2 className="font-extrabold text-xl text-gray-900" style={{ fontFamily: "Plus Jakarta Sans, Segoe UI, sans-serif" }}>
                 Uploaded Files
               </h2>
               <div className="flex items-center gap-2">
@@ -80,8 +81,7 @@ export default function PCDashboard({
                 onChange={(e) => onRoomInputChange(e.target.value.toUpperCase())}
                 placeholder="Enter Room ID"
                 maxLength={6}
-                className="w-full sm:max-w-[220px] px-3 py-2 rounded-xl border border-gray-200 text-sm font-bold tracking-widest text-gray-900 bg-white focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all"
-                style={{ fontFamily: "Syne, sans-serif" }}
+                className="font-room-code w-full sm:max-w-[220px] px-3 py-2 rounded-xl border border-gray-200 text-sm font-bold tracking-widest text-gray-900 bg-white focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all"
                 autoComplete="off"
                 autoCorrect="off"
                 spellCheck={false}

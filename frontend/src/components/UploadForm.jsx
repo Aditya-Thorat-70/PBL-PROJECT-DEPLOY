@@ -12,7 +12,7 @@ function SuccessScreen({ fileCount, lastFileName, roomId, roomExpiresAt, copied,
         ✓
       </div>
       <div>
-        <h2 className="font-extrabold text-2xl text-gray-900 mb-1" style={{ fontFamily: "Syne, sans-serif" }}>
+        <h2 className="font-extrabold text-2xl text-gray-900 mb-1" style={{ fontFamily: "Plus Jakarta Sans, Segoe UI, sans-serif" }}>
           {fileCount > 1 ? `${fileCount} Files Sent!` : "File Sent!"}
         </h2>
         <p className="text-sm text-gray-500">
@@ -23,7 +23,7 @@ function SuccessScreen({ fileCount, lastFileName, roomId, roomExpiresAt, copied,
       </div>
       <div className="w-full bg-gray-50 rounded-xl px-5 py-3 text-left border border-gray-100">
         <div className="text-xs text-gray-400 mb-0.5">Last file sent</div>
-        <div className="font-semibold text-gray-800 text-sm truncate" style={{ fontFamily: "Syne, sans-serif" }}>
+        <div className="font-semibold text-gray-800 text-sm truncate" style={{ fontFamily: "Plus Jakarta Sans, Segoe UI, sans-serif" }}>
           {lastFileName}
         </div>
       </div>
@@ -31,7 +31,7 @@ function SuccessScreen({ fileCount, lastFileName, roomId, roomExpiresAt, copied,
         <div className="w-full bg-indigo-50 rounded-xl px-5 py-3 text-left border border-indigo-100">
           <div className="text-xs text-indigo-500 mb-0.5">Room ID</div>
           <div className="flex items-center justify-between gap-3">
-            <div className="font-semibold text-indigo-900 text-sm tracking-widest" style={{ fontFamily: "Syne, sans-serif" }}>
+            <div className="font-room-code font-semibold text-indigo-900 text-sm tracking-widest">
               {roomId}
             </div>
             <button
@@ -190,7 +190,7 @@ export default function UploadForm({ roomId: defaultRoom, onUpload, onComplete }
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-7 animate-fadeIn">
-      <h2 className="font-extrabold text-2xl text-gray-900 mb-1" style={{ fontFamily: "Syne, sans-serif" }}>
+      <h2 className="font-extrabold text-2xl text-gray-900 mb-1" style={{ fontFamily: "Plus Jakarta Sans, Segoe UI, sans-serif" }}>
         Upload Document
       </h2>
       <p className="text-sm text-gray-500 mb-6">Send a file directly to the printer</p>
@@ -228,7 +228,7 @@ export default function UploadForm({ roomId: defaultRoom, onUpload, onComplete }
                   <div className="flex items-center gap-3 min-w-0">
                     <span className="text-2xl">{fileIcon(selectedFile.name)}</span>
                     <div className="text-left min-w-0">
-                      <div className="font-semibold text-gray-900 text-sm truncate" style={{ fontFamily: "Syne, sans-serif" }}>
+                      <div className="font-semibold text-gray-900 text-sm truncate" style={{ fontFamily: "Plus Jakarta Sans, Segoe UI, sans-serif" }}>
                         {selectedFile.name}
                       </div>
                       <div className="text-xs text-gray-400 mt-0.5">{formatSize(selectedFile.size)}</div>
@@ -250,7 +250,7 @@ export default function UploadForm({ roomId: defaultRoom, onUpload, onComplete }
           ) : (
             <>
               <div className="text-4xl mb-3">📤</div>
-              <p className="font-bold text-gray-800 mb-1" style={{ fontFamily: "Syne, sans-serif" }}>
+              <p className="font-bold text-gray-800 mb-1" style={{ fontFamily: "Plus Jakarta Sans, Segoe UI, sans-serif" }}>
                 Drop files here
               </p>
               <p className="text-sm text-gray-400">
