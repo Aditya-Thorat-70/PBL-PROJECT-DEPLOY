@@ -24,6 +24,10 @@ const driveNoteSchema = new mongoose.Schema(
 const driveFolderSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
+    parentFolderId: {
+      type: mongoose.Schema.Types.ObjectId,
+      default: null,
+    },
     createdAt: { type: Date, default: Date.now },
     files: { type: [driveFileSchema], default: [] },
     notes: { type: [driveNoteSchema], default: [] },
@@ -44,6 +48,21 @@ const studentDriveSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
+  username: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  usernameLower: {
+    type: String,
+    required: true,
+    trim: true,
+    unique: true,
+  },
+  passwordHash: {
+    type: String,
+    required: true,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
@@ -53,5 +72,7 @@ const studentDriveSchema = new mongoose.Schema({
     default: [],
   },
 });
+
+studentDriveSchema.index({ usernameLower: 1 }, { unique: true });
 
 module.exports = mongoose.model("StudentDrive", studentDriveSchema);

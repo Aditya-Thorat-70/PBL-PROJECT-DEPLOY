@@ -1,8 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const { upload, handleUploadErrors } = require("../middleware/uploadMiddleware");
+const { studentDriveAuth } = require("../middleware/studentDriveAuth");
 const {
   createDrive,
+  loginDrive,
+  getMyDrive,
   getDriveById,
   createFolder,
   addFolderNote,
@@ -10,6 +13,11 @@ const {
 } = require("../controllers/studentDriveController");
 
 router.post("/create", createDrive);
+router.post("/login", loginDrive);
+
+router.use(studentDriveAuth);
+
+router.get("/me", getMyDrive);
 router.get("/:driveId", getDriveById);
 router.post("/:driveId/folders", createFolder);
 router.post("/:driveId/folders/:folderId/notes", addFolderNote);

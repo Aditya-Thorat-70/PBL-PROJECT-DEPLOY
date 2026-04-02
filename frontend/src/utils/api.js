@@ -14,6 +14,11 @@ const ensureOk = async (response) => {
   throw new Error(message);
 };
 
+const authHeaders = (token, extra = {}) => ({
+  ...extra,
+  Authorization: `Bearer ${token}`,
+});
+
 export const mapBackendFile = (file) => ({
   id: file._id,
   name: file.originalName || file.fileName,
@@ -85,10 +90,12 @@ const mapStudentDrive = (drive) => ({
   id: drive.id,
   driveId: drive.driveId,
   name: drive.name,
+  username: drive.username,
   createdAt: drive.createdAt,
   folders: (drive.folders || []).map((folder) => ({
     id: folder.id,
     name: folder.name,
+    parentFolderId: folder.parentFolderId || null,
     createdAt: folder.createdAt,
     files: (folder.files || []).map((file) => ({
       id: file.id,
@@ -116,6 +123,40 @@ export const createStudentDrive = async ({ name }) => {
   return mapStudentDrive(data.drive);
 };
 
+export const createStudentDriveAccount = async ({ name, username, password }) => {
+  const response = await fetch(`${API_BASE_URL}/api/student-drive/create`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ name, username, password }),
+  });
+
+  await ensureOk(response);
+  const data = await response.json();
+  return {
+    drive: mapStudentDrive(data.drive),
+    token: data.token,
+  };
+};
+
+export const loginStudentDrive = async ({ username, password }) => {
+  const response = await fetch(`${API_BASE_URL}/api/student-drive/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ username, password }),
+  });
+
+  await ensureOk(response);
+  const data = await response.json();
+  return {
+    drive: mapStudentDrive(data.drive),
+    token: data.token,
+  };
+};
+
 export const getStudentDrive = async (driveId) => {
   const response = await fetch(`${API_BASE_URL}/api/student-drive/${encodeURIComponent(driveId)}`);
   await ensureOk(response);
@@ -124,13 +165,23 @@ export const getStudentDrive = async (driveId) => {
   return mapStudentDrive(data.drive);
 };
 
-export const createStudentDriveFolder = async ({ driveId, name }) => {
+export const getStudentDriveMe = async (token) => {
+  const response = await fetch(`${API_BASE_URL}/api/student-drive/me`, {
+    headers: authHeaders(token),
+  });
+  await ensureOk(response);
+
+  const data = await response.json();
+  return mapStudentDrive(data.drive);
+};
+
+export const createStudentDriveFolder = async ({ token, driveId, name, parentFolderId = null }) => {
   const response = await fetch(`${API_BASE_URL}/api/student-drive/${encodeURIComponent(driveId)}/folders`, {
     method: "POST",
-    headers: {
+    headers: authHeaders(token, {
       "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ name }),
+    }),
+    body: JSON.stringify({ name, parentFolderId }),
   });
 
   await ensureOk(response);
@@ -138,12 +189,12 @@ export const createStudentDriveFolder = async ({ driveId, name }) => {
   return mapStudentDrive(data.drive);
 };
 
-export const createStudentDriveNote = async ({ driveId, folderId, title, content }) => {
+export const createStudentDriveNote = async ({ token, driveId, folderId, title, content }) => {
   const response = await fetch(`${API_BASE_URL}/api/student-drive/${encodeURIComponent(driveId)}/folders/${encodeURIComponent(folderId)}/notes`, {
     method: "POST",
-    headers: {
+    headers: authHeaders(token, {
       "Content-Type": "application/json",
-    },
+    }),
     body: JSON.stringify({ title, content }),
   });
 
@@ -152,12 +203,13 @@ export const createStudentDriveNote = async ({ driveId, folderId, title, content
   return mapStudentDrive(data.drive);
 };
 
-export const uploadStudentDriveFile = async ({ driveId, folderId, file }) => {
+export const uploadStudentDriveFile = async ({ token, driveId, folderId, file }) => {
   const formData = new FormData();
   formData.append("file", file);
 
   const response = await fetch(`${API_BASE_URL}/api/student-drive/${encodeURIComponent(driveId)}/folders/${encodeURIComponent(folderId)}/files`, {
     method: "POST",
+    headers: authHeaders(token),
     body: formData,
   });
 
