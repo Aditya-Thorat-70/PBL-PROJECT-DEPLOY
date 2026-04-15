@@ -1,6 +1,7 @@
 const StudentDrive = require("../models/StudentDrive");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const fs = require("fs");
 
 const formatDriveResponse = (drive) => ({
   id: drive._id,
@@ -281,5 +282,49 @@ exports.uploadFolderFile = async (req, res) => {
     return res.status(201).json({ drive: formatDriveResponse(drive) });
   } catch (error) {
     return res.status(500).json({ message: error.message || "Unable to upload file" });
+  }
+};
+
+exports.deleteFolderFile = async (req, res) => {
+  try {
+    const driveId = normalizeDriveId(req.params.driveId);
+    const authDriveId = normalizeDriveId(req.studentDriveAuth?.driveId || "");
+    const folderId = req.params.folderId;
+    const fileId = req.params.fileId;
+
+    if (!authDriveId || authDriveId !== driveId) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    const drive = await StudentDrive.findOne({ driveId });
+    if (!drive) {
+      return res.status(404).json({ message: "Drive not found" });
+    }
+
+    const folder = drive.folders.id(folderId);
+    if (!folder) {
+      return res.status(404).json({ message: "Folder not found" });
+    }
+
+    const fileSubdoc = folder.files.id(fileId);
+    if (!fileSubdoc) {
+      return res.status(404).json({ message: "File not found" });
+    }
+
+    const diskPath = fileSubdoc.filePath;
+    if (diskPath && fs.existsSync(diskPath)) {
+      try {
+        fs.unlinkSync(diskPath);
+      } catch (unlinkError) {
+        console.error("[StudentDrive Delete Warn] Failed to remove file from disk:", unlinkError.message);
+      }
+    }
+
+    folder.files.pull({ _id: fileId });
+    await drive.save();
+
+    return res.json({ drive: formatDriveResponse(drive) });
+  } catch (error) {
+    return res.status(500).json({ message: error.message || "Unable to delete file" });
   }
 };

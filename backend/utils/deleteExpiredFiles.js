@@ -1,4 +1,5 @@
 const File = require("../models/File");
+const StudentDrive = require("../models/StudentDrive");
 const fs = require("fs");
 const path = require("path");
 
@@ -24,6 +25,22 @@ const cleanupExpiredFiles = async () => {
 
     const deletedEntries = [];
     const activeFileNames = new Set(activeFiles.map((f) => f.fileName).filter(Boolean));
+
+    // Student Drive files are permanent until user deletes them.
+    try {
+      const drives = await StudentDrive.find({}, { folders: 1 }).lean();
+      drives.forEach((drive) => {
+        (drive.folders || []).forEach((folder) => {
+          (folder.files || []).forEach((file) => {
+            if (file?.fileName) {
+              activeFileNames.add(file.fileName);
+            }
+          });
+        });
+      });
+    } catch (driveError) {
+      console.error("[Cleanup Warn] Could not load Student Drive files for orphan-protection:", driveError.message);
+    }
 
     for (const file of expiredFiles) {
       try {

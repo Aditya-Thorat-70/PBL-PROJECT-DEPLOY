@@ -217,3 +217,17 @@ export const uploadStudentDriveFile = async ({ token, driveId, folderId, file })
   const data = await response.json();
   return mapStudentDrive(data.drive);
 };
+
+export const deleteStudentDriveFile = async ({ token, driveId, folderId, fileId }) => {
+  const response = await fetch(
+    `${API_BASE_URL}/api/student-drive/${encodeURIComponent(driveId)}/folders/${encodeURIComponent(folderId)}/files/${encodeURIComponent(fileId)}`,
+    {
+      method: "DELETE",
+      headers: authHeaders(token),
+    }
+  );
+
+  await ensureOk(response);
+  const data = await response.json();
+  return mapStudentDrive(data.drive);
+};

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   createStudentDriveAccount,
   createStudentDriveFolder,
+  deleteStudentDriveFile,
   getStudentDriveMe,
   loginStudentDrive,
   uploadStudentDriveFile,
@@ -404,6 +405,29 @@ export default function StudentDriveDashboard({ toast }) {
     }
   };
 
+  const handleDeleteFile = async (fileId) => {
+    if (!drive || !token || !currentFolderId || !fileId) return;
+
+    const shouldDelete = window.confirm("Delete this document permanently?");
+    if (!shouldDelete) return;
+
+    try {
+      setLoading(true);
+      const updatedDrive = await deleteStudentDriveFile({
+        token,
+        driveId: drive.driveId,
+        folderId: currentFolderId,
+        fileId,
+      });
+      setDrive(updatedDrive);
+      toast("Document deleted", "success");
+    } catch (error) {
+      toast(error.message || "Unable to delete document", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleLogout = () => {
     window.localStorage.removeItem(STUDENT_DRIVE_TOKEN_KEY);
     setDrive(null);
@@ -587,11 +611,12 @@ export default function StudentDriveDashboard({ toast }) {
 
               {viewMode === "list" ? (
               <section className="rounded-2xl border border-gray-200 overflow-hidden">
-                <div className="grid grid-cols-[1.8fr_0.9fr_0.9fr_0.8fr] bg-slate-50 px-4 py-3 text-xs font-semibold text-gray-600">
+                <div className="grid grid-cols-[1.8fr_0.9fr_0.9fr_0.8fr_0.6fr] bg-slate-50 px-4 py-3 text-xs font-semibold text-gray-600">
                   <div>Name</div>
                   <div>Type</div>
                   <div>Date modified</div>
                   <div>File size</div>
+                  <div className="text-right">Action</div>
                 </div>
 
                 {(isRecentView ? recentFiles.length === 0 : childFolders.length === 0 && currentFiles.length === 0) ? (
@@ -602,7 +627,7 @@ export default function StudentDriveDashboard({ toast }) {
                       <button
                         key={folder.id}
                         onClick={() => setCurrentFolderId(folder.id)}
-                        className="w-full text-left grid grid-cols-[1.8fr_0.9fr_0.9fr_0.8fr] px-4 py-3 text-sm hover:bg-slate-50"
+                        className="w-full text-left grid grid-cols-[1.8fr_0.9fr_0.9fr_0.8fr_0.6fr] px-4 py-3 text-sm hover:bg-slate-50"
                       >
                         <div className="font-medium text-gray-800 truncate">
                           <span className="inline-flex items-center justify-center min-w-[42px] h-6 px-2 mr-2 rounded bg-amber-100 text-amber-700 text-[10px] font-bold align-middle">FOLDER</span>
@@ -611,6 +636,7 @@ export default function StudentDriveDashboard({ toast }) {
                         <div className="text-xs md:text-sm text-gray-600">Folder</div>
                         <div className="text-xs md:text-sm text-gray-600">{prettyDate(folder.createdAt)}</div>
                         <div className="text-xs md:text-sm text-gray-400">-</div>
+                        <div className="text-right text-xs text-gray-400">-</div>
                       </button>
                     ))}
 
@@ -620,7 +646,7 @@ export default function StudentDriveDashboard({ toast }) {
                         href={file.viewUrl || "#"}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="grid grid-cols-[1.8fr_0.9fr_0.9fr_0.8fr] px-4 py-3 text-sm hover:bg-slate-50"
+                        className="grid grid-cols-[1.8fr_0.9fr_0.9fr_0.8fr_0.6fr] px-4 py-3 text-sm hover:bg-slate-50"
                       >
                         <div className="font-medium text-gray-800 truncate">
                           <span className="inline-flex items-center justify-center min-w-[42px] h-6 px-2 mr-2 rounded bg-slate-100 text-slate-700 text-[10px] font-bold align-middle">{fileEmoji(file.name)}</span>
@@ -629,6 +655,22 @@ export default function StudentDriveDashboard({ toast }) {
                         <div className="text-xs md:text-sm text-gray-600 uppercase">{(file.mimeType || "file").split("/").pop()}</div>
                         <div className="text-xs md:text-sm text-gray-600">{prettyDate(file.uploadedAt)}</div>
                         <div className="text-xs md:text-sm text-gray-600">{formatSize(file.size || 0)}</div>
+                        <div className="text-right">
+                          {!isRecentView ? (
+                            <button
+                              type="button"
+                              onClick={(event) => {
+                                event.preventDefault();
+                                handleDeleteFile(file.id);
+                              }}
+                              className="px-2.5 py-1 rounded-lg text-xs font-semibold text-red-700 bg-red-50 hover:bg-red-100 border border-red-200"
+                            >
+                              Delete
+                            </button>
+                          ) : (
+                            <span className="text-xs text-gray-400">-</span>
+                          )}
+                        </div>
                       </a>
                     ))}
                   </div>
@@ -653,17 +695,30 @@ export default function StudentDriveDashboard({ toast }) {
                     ))}
 
                     {(isRecentView ? recentFiles : currentFiles).map((file) => (
-                      <a
+                      <div
                         key={file.id}
-                        href={file.viewUrl || "#"}
-                        target="_blank"
-                        rel="noopener noreferrer"
                         className="rounded-2xl border border-gray-200 bg-white p-4 hover:shadow-sm hover:border-cyan-300 transition-all"
                       >
-                        <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 text-[11px] font-bold flex items-center justify-center">{fileEmoji(file.name)}</div>
-                        <div className="mt-2 font-semibold text-gray-800 truncate">{file.name}</div>
+                        <a
+                          href={file.viewUrl || "#"}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block"
+                        >
+                          <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 text-[11px] font-bold flex items-center justify-center">{fileEmoji(file.name)}</div>
+                          <div className="mt-2 font-semibold text-gray-800 truncate">{file.name}</div>
+                        </a>
                         <div className="text-xs text-gray-500 mt-1">{prettyDate(file.uploadedAt)} • {formatSize(file.size || 0)}</div>
-                      </a>
+                        {!isRecentView && (
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteFile(file.id)}
+                            className="mt-2 px-2.5 py-1 rounded-lg text-xs font-semibold text-red-700 bg-red-50 hover:bg-red-100 border border-red-200"
+                          >
+                            Delete
+                          </button>
+                        )}
+                      </div>
                     ))}
                   </div>
                 )}

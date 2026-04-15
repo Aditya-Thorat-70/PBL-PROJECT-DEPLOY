@@ -10,6 +10,7 @@ const {
   createFolder,
   addFolderNote,
   uploadFolderFile,
+  deleteFolderFile,
 } = require("../controllers/studentDriveController");
 
 router.post("/create", createDrive);
@@ -28,5 +29,6 @@ router.post(
   },
   uploadFolderFile
 );
+router.delete("/:driveId/folders/:folderId/files/:fileId", deleteFolderFile);
 
 module.exports = router;
