@@ -22,12 +22,12 @@ const prettyDate = (value) => {
 
 const fileEmoji = (name = "") => {
   const ext = name.split(".").pop()?.toLowerCase();
-  if (ext === "pdf") return "??";
-  if (["jpg", "jpeg", "png", "webp"].includes(ext)) return "???";
-  if (["doc", "docx", "txt"].includes(ext)) return "??";
-  if (["ppt", "pptx"].includes(ext)) return "??";
-  if (["xls", "xlsx"].includes(ext)) return "??";
-  return "??";
+  if (ext === "pdf") return "PDF";
+  if (["jpg", "jpeg", "png", "webp"].includes(ext)) return "IMG";
+  if (["doc", "docx", "txt"].includes(ext)) return "DOC";
+  if (["ppt", "pptx"].includes(ext)) return "PPT";
+  if (["xls", "xlsx"].includes(ext)) return "XLS";
+  return "FILE";
 };
 
 function AuthScreen({
@@ -140,7 +140,7 @@ function FolderTree({ items, activeFolderId, onOpen }) {
               : "text-gray-700 hover:bg-slate-100"
           }`}
         >
-          <span className="mr-2">??</span>
+          <span className="inline-flex items-center justify-center w-5 h-5 rounded bg-cyan-100 text-cyan-700 text-[10px] font-bold mr-2">D</span>
           {folder.name}
         </button>
       ))}
@@ -154,12 +154,12 @@ function UploadDropZone({ disabled, onUpload }) {
 
   return (
     <div
-      className={`rounded-2xl border-2 border-dashed p-6 text-center transition-all ${
+      className={`rounded-2xl border-2 border-dashed p-6 text-center transition-all shadow-sm ${
         disabled
           ? "border-gray-200 bg-gray-50"
           : dragging
-            ? "border-cyan-400 bg-cyan-50"
-            : "border-cyan-200 bg-white hover:bg-cyan-50/40"
+            ? "border-cyan-500 bg-cyan-50"
+            : "border-cyan-200 bg-white hover:bg-cyan-50/40 hover:border-cyan-300"
       }`}
       onDragOver={(event) => {
         event.preventDefault();
@@ -185,7 +185,7 @@ function UploadDropZone({ disabled, onUpload }) {
         }}
       />
 
-      <div className="text-3xl mb-2">??</div>
+      <div className="w-12 h-12 mx-auto mb-2 rounded-xl bg-cyan-100 text-cyan-700 text-lg font-bold flex items-center justify-center">UP</div>
       <p className="text-sm font-semibold text-gray-800">Drag and drop files here</p>
       <p className="text-xs text-gray-500 mt-1">or click browse to upload inside this folder</p>
       <button
@@ -211,7 +211,10 @@ export default function StudentDriveDashboard({ toast }) {
   const [loginPassword, setLoginPassword] = useState("");
   const [newFolderName, setNewFolderName] = useState("");
   const [currentFolderId, setCurrentFolderId] = useState(null);
+  const [viewMode, setViewMode] = useState("list");
+  const [navTab, setNavTab] = useState("drive");
   const [loading, setLoading] = useState(false);
+  const createFolderInputRef = useRef(null);
 
   useEffect(() => {
     const restoreSession = async () => {
@@ -256,6 +259,11 @@ export default function StudentDriveDashboard({ toast }) {
     [drive, currentFolderId]
   );
 
+  const currentFiles = useMemo(() => {
+    if (!currentFolder) return [];
+    return currentFolder.files || [];
+  }, [currentFolder]);
+
   const breadcrumb = useMemo(() => {
     const chain = [];
     let cursor = currentFolder;
@@ -274,6 +282,21 @@ export default function StudentDriveDashboard({ toast }) {
     () => (drive?.folders || []).reduce((sum, folder) => sum + (folder.files?.length || 0), 0),
     [drive]
   );
+
+  const recentFiles = useMemo(() => {
+    if (!drive) return [];
+
+    return (drive.folders || [])
+      .flatMap((folder) =>
+        (folder.files || []).map((file) => ({
+          ...file,
+          folderName: folder.name,
+        }))
+      )
+      .sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
+  }, [drive]);
+
+  const isRecentView = navTab === "recent";
 
   const handleCreateAccount = async () => {
     try {
@@ -391,6 +414,13 @@ export default function StudentDriveDashboard({ toast }) {
     toast("Logged out", "info");
   };
 
+  const handleNewClick = () => {
+    setNavTab("drive");
+    window.setTimeout(() => {
+      createFolderInputRef.current?.focus?.();
+    }, 0);
+  };
+
   if (!drive) {
     return (
       <AuthScreen
@@ -412,44 +442,108 @@ export default function StudentDriveDashboard({ toast }) {
   }
 
   return (
-    <div className="max-w-[1400px] mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6">
-      <div className="rounded-3xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-        <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] min-h-0 md:min-h-[720px]">
-          <aside className="bg-slate-50 border-b md:border-b-0 md:border-r border-gray-200 p-4 space-y-4">
-            <div className="rounded-xl bg-white border border-cyan-200 px-3 py-2 text-xs">
-              <div className="text-cyan-700 font-semibold">Username</div>
-              <div className="mt-0.5 font-bold text-cyan-900">{drive.username || "-"}</div>
-            </div>
+    <div className="max-w-[1600px] mx-auto px-2 sm:px-4 py-3 sm:py-5">
+      <div className="rounded-3xl border border-gray-200 bg-[#f8fafc] shadow-sm overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] min-h-0 lg:min-h-[780px]">
+          <aside className="bg-[#f1f5f9] border-b lg:border-b-0 lg:border-r border-gray-200 p-4">
+            <button
+              onClick={handleNewClick}
+              className="w-full rounded-2xl bg-white border border-gray-300 px-4 py-3 text-sm font-semibold text-gray-800 shadow-sm text-left"
+            >
+              + New
+            </button>
 
-            <div className="rounded-xl bg-white border border-gray-200 px-3 py-2 text-xs space-y-1">
+            <nav className="mt-4 space-y-1 text-sm">
+              <button
+                onClick={() => {
+                  setNavTab("drive");
+                  setCurrentFolderId(null);
+                }}
+                className={`w-full text-left px-3 py-2 rounded-xl ${navTab === "drive" ? "bg-cyan-100 text-cyan-900 font-semibold" : "text-gray-700 hover:bg-white"}`}
+              >
+                Home
+              </button>
+              <button
+                onClick={() => {
+                  setNavTab("drive");
+                  setCurrentFolderId(null);
+                }}
+                className={`w-full text-left px-3 py-2 rounded-xl ${navTab === "drive" ? "bg-cyan-100 text-cyan-900 font-semibold" : "text-gray-700 hover:bg-white"}`}
+              >
+                My Drive
+              </button>
+              <button
+                onClick={() => setNavTab("recent")}
+                className={`w-full text-left px-3 py-2 rounded-xl ${navTab === "recent" ? "bg-cyan-100 text-cyan-900 font-semibold" : "text-gray-700 hover:bg-white"}`}
+              >
+                Recent
+              </button>
+            </nav>
+
+            <div className="mt-5 rounded-xl bg-white border border-gray-200 px-3 py-3 text-xs space-y-2">
+              <div className="flex items-center justify-between"><span className="text-gray-500">Username</span><span className="font-semibold text-gray-800">{drive.username || "-"}</span></div>
               <div className="flex items-center justify-between"><span className="text-gray-500">Folders</span><span className="font-semibold text-gray-800">{drive.folders.length}</span></div>
               <div className="flex items-center justify-between"><span className="text-gray-500">Documents</span><span className="font-semibold text-gray-800">{totalFiles}</span></div>
             </div>
 
-            <div>
+            <div className="mt-5">
               <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Root folders</h3>
               <FolderTree items={rootFolders} activeFolderId={currentFolderId} onOpen={setCurrentFolderId} />
             </div>
           </aside>
 
           <main className="bg-white">
-            <div className="p-3 sm:p-4 border-b border-gray-200 flex flex-wrap gap-2 items-center justify-between">
-              <div className="min-w-0">
-                <h1 className="font-extrabold text-xl sm:text-2xl text-gray-900 truncate">{drive.name}</h1>
-                <p className="text-xs text-gray-500">Nested folders with folder-specific documents.</p>
+            <div className="px-4 sm:px-6 py-4 border-b border-gray-200 flex flex-col gap-3">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="text-xl sm:text-3xl font-bold text-gray-900 flex items-center gap-2">
+                  <span>{isRecentView ? "Recent" : "My Drive"}</span>
+                  {!isRecentView && (
+                    <>
+                      <span className="text-gray-400">›</span>
+                      <span className="truncate max-w-[260px]">{drive.name}</span>
+                    </>
+                  )}
+                  {!isRecentView && currentFolder && (
+                    <>
+                      <span className="text-gray-400">›</span>
+                      <span className="truncate max-w-[240px]">{currentFolder.name}</span>
+                    </>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <div className="rounded-full border border-gray-300 overflow-hidden inline-flex">
+                    <button
+                      onClick={() => setViewMode("list")}
+                      className={`px-3 py-1.5 text-xs font-semibold ${viewMode === "list" ? "bg-cyan-100 text-cyan-900" : "text-gray-600 bg-white"}`}
+                    >
+                      List
+                    </button>
+                    <button
+                      onClick={() => setViewMode("grid")}
+                      className={`px-3 py-1.5 text-xs font-semibold ${viewMode === "grid" ? "bg-cyan-100 text-cyan-900" : "text-gray-600 bg-white"}`}
+                    >
+                      Grid
+                    </button>
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    className="px-3 py-2 rounded-xl text-xs font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200"
+                  >
+                    Logout
+                  </button>
+                </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={handleLogout}
-                  className="px-3 py-2 rounded-xl text-xs font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200"
-                >
-                  Logout
-                </button>
+              <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
+                <span className="px-3 py-1 rounded-full bg-slate-100 border border-slate-200">Folders: {drive.folders.length}</span>
+                <span className="px-3 py-1 rounded-full bg-slate-100 border border-slate-200">Files: {totalFiles}</span>
+                {isRecentView && <span className="px-3 py-1 rounded-full bg-cyan-100 border border-cyan-200 text-cyan-800">Showing recent files</span>}
               </div>
             </div>
 
-            <div className="p-3 sm:p-5 space-y-5">
+            <div className="px-4 sm:px-6 py-4 space-y-4">
+              {!isRecentView && (
               <section className="rounded-2xl border border-gray-200 bg-slate-50 p-4">
                 <div className="flex flex-wrap items-center gap-2 text-sm mb-3">
                   <button
@@ -469,95 +563,112 @@ export default function StudentDriveDashboard({ toast }) {
                   ))}
                 </div>
 
-                <h2 className="font-semibold text-gray-800 mb-2">{currentFolder ? `Open folder: ${currentFolder.name}` : "Root level"}</h2>
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <input
-                    value={newFolderName}
-                    onChange={(event) => setNewFolderName(event.target.value)}
-                    placeholder={currentFolder ? "Create subfolder" : "Create new root folder"}
-                    className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-sm text-gray-900 bg-white focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
-                  />
-                  <button
-                    onClick={handleCreateFolder}
-                    disabled={!newFolderName.trim() || loading}
-                    className="px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-cyan-600 to-blue-700 hover:shadow-md disabled:opacity-50"
-                  >
-                    {currentFolder ? "Add Subfolder" : "Add Folder"}
-                  </button>
+                <div className="grid grid-cols-1 xl:grid-cols-[1fr_340px] gap-3">
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <input
+                      ref={createFolderInputRef}
+                      value={newFolderName}
+                      onChange={(event) => setNewFolderName(event.target.value)}
+                      placeholder={currentFolder ? "Create subfolder" : "Create new root folder"}
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-sm text-gray-900 bg-white focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
+                    />
+                    <button
+                      onClick={handleCreateFolder}
+                      disabled={!newFolderName.trim() || loading}
+                      className="px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-cyan-600 to-blue-700 hover:shadow-md disabled:opacity-50"
+                    >
+                      {currentFolder ? "Add Subfolder" : "Add Folder"}
+                    </button>
+                  </div>
+                  <UploadDropZone disabled={!currentFolderId || loading} onUpload={handleUploadInCurrentFolder} />
                 </div>
               </section>
+              )}
 
-              <section>
-                <h2 className="font-semibold text-gray-800 mb-3">Folders in current location</h2>
-                {childFolders.length === 0 ? (
-                  <div className="rounded-2xl border border-dashed border-gray-300 bg-white px-5 py-8 text-sm text-gray-500 text-center">
-                    No subfolders here yet.
+              {viewMode === "list" ? (
+              <section className="rounded-2xl border border-gray-200 overflow-hidden">
+                <div className="grid grid-cols-[1.8fr_0.9fr_0.9fr_0.8fr] bg-slate-50 px-4 py-3 text-xs font-semibold text-gray-600">
+                  <div>Name</div>
+                  <div>Type</div>
+                  <div>Date modified</div>
+                  <div>File size</div>
+                </div>
+
+                {(isRecentView ? recentFiles.length === 0 : childFolders.length === 0 && currentFiles.length === 0) ? (
+                  <div className="px-4 py-10 text-sm text-gray-500 text-center">No items in this location.</div>
+                ) : (
+                  <div className="divide-y divide-gray-100">
+                    {!isRecentView && childFolders.map((folder) => (
+                      <button
+                        key={folder.id}
+                        onClick={() => setCurrentFolderId(folder.id)}
+                        className="w-full text-left grid grid-cols-[1.8fr_0.9fr_0.9fr_0.8fr] px-4 py-3 text-sm hover:bg-slate-50"
+                      >
+                        <div className="font-medium text-gray-800 truncate">
+                          <span className="inline-flex items-center justify-center min-w-[42px] h-6 px-2 mr-2 rounded bg-amber-100 text-amber-700 text-[10px] font-bold align-middle">FOLDER</span>
+                          {folder.name}
+                        </div>
+                        <div className="text-xs md:text-sm text-gray-600">Folder</div>
+                        <div className="text-xs md:text-sm text-gray-600">{prettyDate(folder.createdAt)}</div>
+                        <div className="text-xs md:text-sm text-gray-400">-</div>
+                      </button>
+                    ))}
+
+                    {(isRecentView ? recentFiles : currentFiles).map((file) => (
+                      <a
+                        key={file.id}
+                        href={file.viewUrl || "#"}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="grid grid-cols-[1.8fr_0.9fr_0.9fr_0.8fr] px-4 py-3 text-sm hover:bg-slate-50"
+                      >
+                        <div className="font-medium text-gray-800 truncate">
+                          <span className="inline-flex items-center justify-center min-w-[42px] h-6 px-2 mr-2 rounded bg-slate-100 text-slate-700 text-[10px] font-bold align-middle">{fileEmoji(file.name)}</span>
+                          {file.name}
+                        </div>
+                        <div className="text-xs md:text-sm text-gray-600 uppercase">{(file.mimeType || "file").split("/").pop()}</div>
+                        <div className="text-xs md:text-sm text-gray-600">{prettyDate(file.uploadedAt)}</div>
+                        <div className="text-xs md:text-sm text-gray-600">{formatSize(file.size || 0)}</div>
+                      </a>
+                    ))}
                   </div>
+                )}
+              </section>
+              ) : (
+              <section className="rounded-2xl border border-gray-200 bg-white p-4">
+                {(isRecentView ? recentFiles.length === 0 : childFolders.length === 0 && currentFiles.length === 0) ? (
+                  <div className="px-4 py-10 text-sm text-gray-500 text-center">No items in this location.</div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
-                    {childFolders.map((folder) => (
+                    {!isRecentView && childFolders.map((folder) => (
                       <button
                         key={folder.id}
                         onClick={() => setCurrentFolderId(folder.id)}
                         className="text-left rounded-2xl border border-gray-200 bg-white p-4 hover:shadow-sm hover:border-cyan-300 transition-all"
                       >
-                        <div className="text-lg">??</div>
-                        <div className="mt-1 font-semibold text-gray-800 truncate">{folder.name}</div>
-                        <div className="text-xs text-gray-500 mt-1">
-                          {(folder.files?.length || 0)} docs � {prettyDate(folder.createdAt)}
-                        </div>
+                        <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 text-xs font-bold flex items-center justify-center">DIR</div>
+                        <div className="mt-2 font-semibold text-gray-800 truncate">{folder.name}</div>
+                        <div className="text-xs text-gray-500 mt-1">Folder • {prettyDate(folder.createdAt)}</div>
                       </button>
+                    ))}
+
+                    {(isRecentView ? recentFiles : currentFiles).map((file) => (
+                      <a
+                        key={file.id}
+                        href={file.viewUrl || "#"}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="rounded-2xl border border-gray-200 bg-white p-4 hover:shadow-sm hover:border-cyan-300 transition-all"
+                      >
+                        <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 text-[11px] font-bold flex items-center justify-center">{fileEmoji(file.name)}</div>
+                        <div className="mt-2 font-semibold text-gray-800 truncate">{file.name}</div>
+                        <div className="text-xs text-gray-500 mt-1">{prettyDate(file.uploadedAt)} • {formatSize(file.size || 0)}</div>
+                      </a>
                     ))}
                   </div>
                 )}
               </section>
-
-              <section>
-                <h2 className="font-semibold text-gray-800 mb-3">Upload documents to opened folder</h2>
-                <UploadDropZone disabled={!currentFolderId || loading} onUpload={handleUploadInCurrentFolder} />
-              </section>
-
-              <section>
-                <h2 className="font-semibold text-gray-800 mb-3">Documents in opened folder</h2>
-                {!currentFolder ? (
-                  <div className="rounded-2xl border border-dashed border-gray-300 bg-white px-5 py-8 text-sm text-gray-500 text-center">
-                    Open a folder to view and upload documents.
-                  </div>
-                ) : (currentFolder.files || []).length === 0 ? (
-                  <div className="rounded-2xl border border-dashed border-gray-300 bg-white px-5 py-8 text-sm text-gray-500 text-center">
-                    This folder has no documents yet.
-                  </div>
-                ) : (
-                  <div className="rounded-2xl border border-gray-200 overflow-hidden">
-                    <div className="hidden md:grid grid-cols-[1.8fr_0.9fr_0.9fr_0.8fr] bg-slate-50 px-4 py-2 text-xs font-semibold text-gray-600">
-                      <div>Name</div>
-                      <div>Type</div>
-                      <div>Size</div>
-                      <div>Added</div>
-                    </div>
-
-                    <div className="divide-y divide-gray-100">
-                      {(currentFolder.files || []).map((file) => (
-                        <a
-                          key={file.id}
-                          href={file.viewUrl || "#"}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="block md:grid md:grid-cols-[1.8fr_0.9fr_0.9fr_0.8fr] px-4 py-3 text-sm hover:bg-slate-50"
-                        >
-                          <div className="font-medium text-gray-800 truncate">
-                            <span className="mr-2">{fileEmoji(file.name)}</span>
-                            {file.name}
-                          </div>
-                          <div className="mt-1 md:mt-0 text-xs md:text-sm text-gray-600 uppercase">{(file.mimeType || "file").split("/").pop()}</div>
-                          <div className="mt-1 md:mt-0 text-xs md:text-sm text-gray-600">{formatSize(file.size || 0)}</div>
-                          <div className="mt-1 md:mt-0 text-xs md:text-sm text-gray-500">{prettyDate(file.uploadedAt)}</div>
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </section>
+              )}
             </div>
 
             {loading && (
