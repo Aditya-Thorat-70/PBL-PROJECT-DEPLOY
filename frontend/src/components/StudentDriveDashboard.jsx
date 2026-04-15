@@ -563,19 +563,19 @@ export default function StudentDriveDashboard({ toast }) {
                   ))}
                 </div>
 
-                <div className="grid grid-cols-1 xl:grid-cols-[1fr_340px] gap-3">
-                  <div className="flex flex-col sm:flex-row gap-2">
+                <div className="grid grid-cols-1 xl:grid-cols-[1fr_340px] gap-3 items-start">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                     <input
                       ref={createFolderInputRef}
                       value={newFolderName}
                       onChange={(event) => setNewFolderName(event.target.value)}
                       placeholder={currentFolder ? "Create subfolder" : "Create new root folder"}
-                      className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-sm text-gray-900 bg-white focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
+                      className="w-full sm:flex-1 h-11 px-4 rounded-xl border border-gray-300 text-sm text-gray-900 bg-white focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
                     />
                     <button
                       onClick={handleCreateFolder}
                       disabled={!newFolderName.trim() || loading}
-                      className="px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-cyan-600 to-blue-700 hover:shadow-md disabled:opacity-50"
+                      className="h-11 px-4 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-cyan-600 to-blue-700 hover:shadow-md disabled:opacity-50 shrink-0 whitespace-nowrap"
                     >
                       {currentFolder ? "Add Subfolder" : "Add Folder"}
                     </button>
