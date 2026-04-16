@@ -46,6 +46,9 @@ function AuthScreen({
   onLogin,
   loading,
 }) {
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false);
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+
   return (
     <div className="max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-8">
       <div className="rounded-3xl border border-gray-200 bg-gradient-to-br from-slate-50 via-white to-cyan-50/30 shadow-sm p-4 sm:p-6 md:p-8">
@@ -74,14 +77,23 @@ function AuthScreen({
                 autoComplete="off"
                 className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-sm text-gray-900 bg-white focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
               />
-              <input
-                type="password"
-                value={registerPassword}
-                onChange={(event) => setRegisterPassword(event.target.value)}
-                placeholder="Password (min 6 chars)"
-                autoComplete="new-password"
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-sm text-gray-900 bg-white focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
-              />
+              <div className="relative">
+                <input
+                  type={showRegisterPassword ? "text" : "password"}
+                  value={registerPassword}
+                  onChange={(event) => setRegisterPassword(event.target.value)}
+                  placeholder="Password (min 6 chars)"
+                  autoComplete="new-password"
+                  className="w-full px-4 py-2.5 pr-24 rounded-xl border border-gray-300 text-sm text-gray-900 bg-white focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowRegisterPassword((previous) => !previous)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-cyan-700 hover:text-cyan-800"
+                >
+                  {showRegisterPassword ? "Hide" : "Show"}
+                </button>
+              </div>
             </div>
 
             <button
@@ -105,14 +117,23 @@ function AuthScreen({
                 autoComplete="off"
                 className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-sm text-gray-900 bg-white focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
               />
-              <input
-                type="password"
-                value={loginPassword}
-                onChange={(event) => setLoginPassword(event.target.value)}
-                placeholder="Password"
-                autoComplete="new-password"
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-sm text-gray-900 bg-white focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
-              />
+              <div className="relative">
+                <input
+                  type={showLoginPassword ? "text" : "password"}
+                  value={loginPassword}
+                  onChange={(event) => setLoginPassword(event.target.value)}
+                  placeholder="Password"
+                  autoComplete="new-password"
+                  className="w-full px-4 py-2.5 pr-24 rounded-xl border border-gray-300 text-sm text-gray-900 bg-white focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowLoginPassword((previous) => !previous)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-cyan-700 hover:text-cyan-800"
+                >
+                  {showLoginPassword ? "Hide" : "Show"}
+                </button>
+              </div>
             </div>
 
             <button
