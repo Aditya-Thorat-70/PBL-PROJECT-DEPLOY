@@ -7,7 +7,7 @@ import StudentDriveDashboard from "./components/StudentDriveDashboard";
 import ToastContainer from "./components/Toast";
 import { useToast } from "./hooks/useToast";
 import { generateRoomId } from "./utils/helpers";
-import { createRoom, fetchFilesByRoom, fetchRoomById, uploadFileToRoom } from "./utils/api";
+import { activateRoomOnPc, createRoom, fetchFilesByRoom, fetchRoomById, uploadFileToRoom } from "./utils/api";
 import { SOCKET_URL } from "./utils/config";
 
 export default function App() {
@@ -19,6 +19,7 @@ export default function App() {
   const [mobilePrefillRoomId, setMobilePrefillRoomId] = useState(null);
   const [roomFiles, setRoomFiles] = useState({ [initialRoomId]: [] });
   const [roomExpiryById, setRoomExpiryById] = useState({});
+  const [roomTimerModeById, setRoomTimerModeById] = useState({});
   const [socket, setSocket] = useState(null);
   const { toasts, toast, removeToast } = useToast();
 
@@ -102,6 +103,12 @@ export default function App() {
       ...prev,
       [nextRoomId]: roomData.expiresAt,
     }));
+    if (roomData.timerMode) {
+      setRoomTimerModeById((prev) => ({
+        ...prev,
+        [nextRoomId]: roomData.timerMode,
+      }));
+    }
     return roomData;
   };
 
@@ -142,7 +149,15 @@ export default function App() {
       }
 
       try {
-        await loadRoomSession(nextRoomId);
+        const activatedRoom = await activateRoomOnPc(nextRoomId);
+        setRoomExpiryById((prev) => ({
+          ...prev,
+          [nextRoomId]: activatedRoom.expiresAt,
+        }));
+        setRoomTimerModeById((prev) => ({
+          ...prev,
+          [nextRoomId]: activatedRoom.timerMode || "pc-open-10m",
+        }));
       } catch {
         const fallbackExpiry = getExpiryFromFiles(fetchedFiles);
         if (fallbackExpiry) {
@@ -187,13 +202,23 @@ export default function App() {
   const handleUpload = async (selectedFile, selectedRoomId) => {
     try {
       let targetRoomId = (selectedRoomId || "").toUpperCase().trim();
+      const hasExplicitRoom = Boolean(targetRoomId);
 
       if (!targetRoomId) {
         targetRoomId = await createRoom();
         toast(`Room created: ${targetRoomId}`, "info");
       }
 
-      const uploadedFile = await uploadFileToRoom({ roomId: targetRoomId, file: selectedFile, uploadSource: "mobile" });
+      const uploadSource = hasExplicitRoom ? "scanner" : "mobile";
+
+      const uploadedFile = await uploadFileToRoom({ roomId: targetRoomId, file: selectedFile, uploadSource });
+
+      if (uploadedFile?.roomTimerMode) {
+        setRoomTimerModeById((prev) => ({
+          ...prev,
+          [targetRoomId]: uploadedFile.roomTimerMode,
+        }));
+      }
 
       let roomSession = null;
       try {
@@ -220,6 +245,7 @@ export default function App() {
       }
       return {
         ...uploadedFile,
+        roomTimerMode: roomSession?.timerMode || uploadedFile?.roomTimerMode || null,
         roomExpiresAt: roomSession?.expiresAt || uploadedFile?.expiresAt || null,
       };
     } catch (error) {
@@ -250,6 +276,7 @@ export default function App() {
                 files={files}
                 roomId={roomId}
                 roomExpiresAt={roomExpiryById[roomId] || null}
+                roomTimerMode={roomTimerModeById[roomId] || null}
                 roomInput={roomInput}
                 onRoomInputChange={setRoomInput}
                 onOpenRoom={handleOpenRoom}

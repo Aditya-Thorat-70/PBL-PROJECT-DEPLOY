@@ -5,7 +5,23 @@ import SessionTimer from "./SessionTimer";
 
 const MAX_UPLOAD_MB = Number(import.meta.env.VITE_MAX_UPLOAD_SIZE_MB || 50);
 
-function SuccessScreen({ fileCount, lastFileName, roomId, roomExpiresAt, copied, onCopyRoom, onReset }) {
+function SuccessScreen({ fileCount, lastFileName, roomId, roomTimerMode, roomExpiresAt, copied, onCopyRoom, onReset }) {
+  const timerModeMap = {
+    "standard-48h": {
+      label: "Standard Timer: 48 hours",
+      className: "bg-blue-100 text-blue-700 border-blue-200",
+    },
+    "scanner-10m": {
+      label: "Scanner Timer: 10 minutes",
+      className: "bg-amber-100 text-amber-800 border-amber-200",
+    },
+    "pc-open-10m": {
+      label: "PC Active Timer: 10 minutes",
+      className: "bg-rose-100 text-rose-700 border-rose-200",
+    },
+  };
+  const timerModeMeta = roomTimerMode ? timerModeMap[roomTimerMode] || null : null;
+
   return (
     <div className="flex flex-col items-center gap-5 text-center py-10 animate-fadeIn">
       <div className="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-500 to-green-400 flex items-center justify-center text-4xl shadow-lg shadow-emerald-200 animate-fadeIn">
@@ -43,6 +59,11 @@ function SuccessScreen({ fileCount, lastFileName, roomId, roomExpiresAt, copied,
           </div>
         </div>
       )}
+      {timerModeMeta && (
+        <div className={`w-full rounded-xl px-5 py-2.5 text-left border text-xs font-semibold ${timerModeMeta.className}`}>
+          {timerModeMeta.label}
+        </div>
+      )}
       {roomExpiresAt && <SessionTimer expiresAt={roomExpiresAt} roomId={roomId} />}
       <button
         onClick={onReset}
@@ -63,6 +84,7 @@ export default function UploadForm({ roomId: defaultRoom, onUpload, onComplete }
   const [success, setSuccess] = useState(false);
   const [copied, setCopied] = useState(false);
   const [uploadedSummary, setUploadedSummary] = useState({ count: 0, lastFileName: "" });
+  const [roomTimerMode, setRoomTimerMode] = useState(null);
   const [roomExpiresAt, setRoomExpiresAt] = useState(null);
   const inputRef = useRef();
 
@@ -111,6 +133,10 @@ export default function UploadForm({ roomId: defaultRoom, onUpload, onComplete }
           setRoomExpiresAt(uploaded.roomExpiresAt);
         }
 
+        if (uploaded?.roomTimerMode) {
+          setRoomTimerMode(uploaded.roomTimerMode);
+        }
+
         setProgress(Math.round(((index + 1) / files.length) * 100));
       }
 
@@ -128,6 +154,7 @@ export default function UploadForm({ roomId: defaultRoom, onUpload, onComplete }
     setSuccess(false);
     setCopied(false);
     setUploadedSummary({ count: 0, lastFileName: "" });
+    setRoomTimerMode(null);
     setRoomExpiresAt(null);
     setRoom(defaultRoom || "");
     setProgress(0);
@@ -179,6 +206,7 @@ export default function UploadForm({ roomId: defaultRoom, onUpload, onComplete }
           fileCount={uploadedSummary.count}
           lastFileName={uploadedSummary.lastFileName}
           roomId={room}
+          roomTimerMode={roomTimerMode}
           roomExpiresAt={roomExpiresAt}
           copied={copied}
           onCopyRoom={copyRoomId}

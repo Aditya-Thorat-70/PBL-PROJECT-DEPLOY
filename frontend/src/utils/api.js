@@ -62,6 +62,27 @@ export const fetchRoomById = async (roomId) => {
     roomId: data.roomId,
     createdAt: data.createdAt,
     expiresAt: data.expiresAt,
+    timerMode: data.timerMode,
+    isActive: data.isActive,
+  };
+};
+
+export const activateRoomOnPc = async (roomId) => {
+  const response = await fetch(`${API_BASE_URL}/api/rooms/${encodeURIComponent(roomId)}/activate-pc`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({}),
+  });
+  await ensureOk(response);
+
+  const data = await response.json();
+  return {
+    roomId: data.roomId,
+    createdAt: data.createdAt,
+    expiresAt: data.expiresAt,
+    timerMode: data.timerMode,
     isActive: data.isActive,
   };
 };
@@ -82,6 +103,7 @@ export const uploadFileToRoom = async ({ roomId, file, uploadSource = "mobile" }
   const data = await response.json();
   return {
     ...mapBackendFile(data.file),
+    roomTimerMode: data.roomTimerMode || null,
     conversionWarning: data.conversionWarning || null,
   };
 };

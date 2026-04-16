@@ -12,7 +12,7 @@ const fileSchema = new mongoose.Schema({
   mimeType: String, // File MIME type
   uploadSource: {
     type: String,
-    enum: ['pc', 'mobile', 'unknown'],
+    enum: ['pc', 'mobile', 'scanner', 'unknown'],
     default: 'unknown'
   },
   uploadedAt: {

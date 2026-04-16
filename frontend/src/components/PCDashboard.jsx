@@ -7,6 +7,7 @@ export default function PCDashboard({
   files,
   roomId,
   roomExpiresAt,
+  roomTimerMode,
   roomInput,
   onRoomInputChange,
   onOpenRoom,
@@ -15,6 +16,22 @@ export default function PCDashboard({
   onView,
   onPrint,
 }) {
+  const timerModeMap = {
+    "standard-48h": {
+      label: "Standard 48h",
+      className: "bg-blue-100 text-blue-700",
+    },
+    "scanner-10m": {
+      label: "Scanner 10m",
+      className: "bg-amber-100 text-amber-800",
+    },
+    "pc-open-10m": {
+      label: "PC Active 10m",
+      className: "bg-rose-100 text-rose-700",
+    },
+  };
+
+  const timerModeMeta = roomTimerMode ? timerModeMap[roomTimerMode] || null : null;
   const [showInputRoomId, setShowInputRoomId] = useState(false);
   const maskedRoomId = useMemo(() => (roomId ? "*".repeat(String(roomId).length) : ""), [roomId]);
 
@@ -95,8 +112,13 @@ export default function PCDashboard({
             </div>
 
             {roomExpiresAt && (
-              <div className="pt-1">
+              <div className="pt-1 flex flex-wrap items-center gap-2">
                 <SessionTimer expiresAt={roomExpiresAt} roomId={roomId} compact />
+                {timerModeMeta && (
+                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${timerModeMeta.className}`}>
+                    {timerModeMeta.label}
+                  </span>
+                )}
               </div>
             )}
           </div>

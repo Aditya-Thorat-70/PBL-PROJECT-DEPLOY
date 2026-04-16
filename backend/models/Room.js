@@ -13,6 +13,11 @@ const roomSchema = new mongoose.Schema({
   expiresAt: {
     type: Date,
     required: true
+  },
+  timerMode: {
+    type: String,
+    enum: ["standard-48h", "scanner-10m", "pc-open-10m"],
+    default: "standard-48h"
   }
 });
 roomSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });

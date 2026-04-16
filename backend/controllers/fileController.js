@@ -5,10 +5,19 @@ const fs = require("fs");
 const fsPromises = require("fs/promises");
 const { convertFileToPdf } = require("../utils/convertToPdf");
 
+const ROOM_EXPIRY_48_HOURS_MS = 48 * 60 * 60 * 1000;
+const ROOM_EXPIRY_10_MINUTES_MS = 10 * 60 * 1000;
+const VALID_UPLOAD_SOURCES = new Set(["pc", "mobile", "scanner"]);
+
 exports.uploadFile = async (req, res) => {
   try {
     const { roomId, uploadSource } = req.body;
     const normalizedRoomId = String(roomId || "").toUpperCase().trim();
+    const normalizedUploadSource = String(uploadSource || "unknown").toLowerCase().trim();
+    const resolvedUploadSource = VALID_UPLOAD_SOURCES.has(normalizedUploadSource)
+      ? normalizedUploadSource
+      : "unknown";
+    const isScannerUpload = resolvedUploadSource === "scanner";
 
     if (!normalizedRoomId) {
       return res.status(400).json({ message: "Room ID is required" });
@@ -48,14 +57,20 @@ exports.uploadFile = async (req, res) => {
       }
     }
 
-    const expiresAt = new Date(Date.now() + 3 * 60 * 60 * 1000); // 3 hours from now
+    const roomTimerMode = isScannerUpload ? "scanner-10m" : "standard-48h";
+    const expiresAt = new Date(
+      Date.now() + (isScannerUpload ? ROOM_EXPIRY_10_MINUTES_MS : ROOM_EXPIRY_48_HOURS_MS)
+    );
 
     await Room.updateOne(
       { roomId: normalizedRoomId },
       {
+        $set: {
+          expiresAt,
+          timerMode: roomTimerMode,
+        },
         $setOnInsert: {
           roomId: normalizedRoomId,
-          expiresAt,
         },
       },
       { upsert: true }
@@ -68,9 +83,12 @@ exports.uploadFile = async (req, res) => {
       filePath,
       fileSize,
       mimeType,
-      uploadSource: uploadSource || 'unknown',
+      uploadSource: resolvedUploadSource,
       expiresAt
     });
+
+    // Keep all files in the same room aligned with the current room timer.
+    await File.updateMany({ roomId: normalizedRoomId }, { $set: { expiresAt } });
 
     // Emit real-time event to all clients in the room
     const io = req.app.get('io');
@@ -82,6 +100,7 @@ exports.uploadFile = async (req, res) => {
     res.status(200).json({
       message: "File uploaded successfully",
       file: newFile,
+      roomTimerMode,
       conversionWarning,
     });
 
