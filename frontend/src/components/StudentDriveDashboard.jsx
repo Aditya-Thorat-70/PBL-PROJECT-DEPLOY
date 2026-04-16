@@ -64,12 +64,14 @@ function AuthScreen({
                 value={registerName}
                 onChange={(event) => setRegisterName(event.target.value)}
                 placeholder="Drive name"
+                autoComplete="off"
                 className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-sm text-gray-900 bg-white focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
               />
               <input
                 value={registerUsername}
                 onChange={(event) => setRegisterUsername(event.target.value)}
                 placeholder="Username"
+                autoComplete="off"
                 className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-sm text-gray-900 bg-white focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
               />
               <input
@@ -77,6 +79,7 @@ function AuthScreen({
                 value={registerPassword}
                 onChange={(event) => setRegisterPassword(event.target.value)}
                 placeholder="Password (min 6 chars)"
+                autoComplete="new-password"
                 className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-sm text-gray-900 bg-white focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
               />
             </div>
@@ -99,6 +102,7 @@ function AuthScreen({
                 value={loginUsername}
                 onChange={(event) => setLoginUsername(event.target.value)}
                 placeholder="Username"
+                autoComplete="off"
                 className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-sm text-gray-900 bg-white focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
               />
               <input
@@ -106,6 +110,7 @@ function AuthScreen({
                 value={loginPassword}
                 onChange={(event) => setLoginPassword(event.target.value)}
                 placeholder="Password"
+                autoComplete="new-password"
                 className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-sm text-gray-900 bg-white focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
               />
             </div>
@@ -217,6 +222,14 @@ export default function StudentDriveDashboard({ toast }) {
   const [loading, setLoading] = useState(false);
   const createFolderInputRef = useRef(null);
 
+  const clearAuthFields = () => {
+    setRegisterName("");
+    setRegisterUsername("");
+    setRegisterPassword("");
+    setLoginUsername("");
+    setLoginPassword("");
+  };
+
   useEffect(() => {
     const restoreSession = async () => {
       const storedToken = window.localStorage.getItem(STUDENT_DRIVE_TOKEN_KEY);
@@ -312,8 +325,7 @@ export default function StudentDriveDashboard({ toast }) {
       setToken(response.token);
       window.localStorage.setItem(STUDENT_DRIVE_TOKEN_KEY, response.token);
       setCurrentFolderId(null);
-      setLoginUsername("");
-      setLoginPassword("");
+      clearAuthFields();
       toast("Student Drive account created", "success");
     } catch (error) {
       toast(error.message || "Unable to create account", "error");
@@ -334,6 +346,7 @@ export default function StudentDriveDashboard({ toast }) {
       setToken(response.token);
       window.localStorage.setItem(STUDENT_DRIVE_TOKEN_KEY, response.token);
       setCurrentFolderId(null);
+      clearAuthFields();
       toast("Logged in successfully", "success");
     } catch (error) {
       toast(error.message || "Unable to login", "error");
@@ -433,8 +446,7 @@ export default function StudentDriveDashboard({ toast }) {
     setDrive(null);
     setToken("");
     setCurrentFolderId(null);
-    setRegisterPassword("");
-    setLoginPassword("");
+    clearAuthFields();
     toast("Logged out", "info");
   };
 
