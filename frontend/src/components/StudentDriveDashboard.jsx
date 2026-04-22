@@ -7,6 +7,7 @@ import {
   loginStudentDrive,
   uploadStudentDriveFile,
 } from "../utils/api";
+import { openFileViewer } from "../utils/fileViewer";
 import { formatSize } from "../utils/helpers";
 import Loader from "./Loader";
 
@@ -462,6 +463,18 @@ export default function StudentDriveDashboard({ toast }) {
     }
   };
 
+  const handlePreviewFile = (file) => {
+    if (!file?.viewUrl) {
+      toast("Preview is not available for this file", "error");
+      return;
+    }
+
+    const viewer = openFileViewer(file.viewUrl);
+    if (!viewer.ok) {
+      toast(viewer.error || "Unable to open file preview", "error");
+    }
+  };
+
   const handleLogout = () => {
     window.localStorage.removeItem(STUDENT_DRIVE_TOKEN_KEY);
     setDrive(null);
@@ -674,11 +687,8 @@ export default function StudentDriveDashboard({ toast }) {
                     ))}
 
                     {(isRecentView ? recentFiles : currentFiles).map((file) => (
-                      <a
+                      <div
                         key={file.id}
-                        href={file.viewUrl || "#"}
-                        target="_blank"
-                        rel="noopener noreferrer"
                         className="grid grid-cols-[1.8fr_0.9fr_0.9fr_0.8fr_0.6fr] px-4 py-3 text-sm hover:bg-slate-50"
                       >
                         <div className="font-medium text-gray-800 truncate">
@@ -688,12 +698,18 @@ export default function StudentDriveDashboard({ toast }) {
                         <div className="text-xs md:text-sm text-gray-600 uppercase">{(file.mimeType || "file").split("/").pop()}</div>
                         <div className="text-xs md:text-sm text-gray-600">{prettyDate(file.uploadedAt)}</div>
                         <div className="text-xs md:text-sm text-gray-600">{formatSize(file.size || 0)}</div>
-                        <div className="text-right">
+                        <div className="text-right flex items-center justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handlePreviewFile(file)}
+                            className="px-2.5 py-1 rounded-lg text-xs font-semibold text-gray-700 bg-gray-50 hover:bg-gray-100 border border-gray-200"
+                          >
+                            View
+                          </button>
                           {!isRecentView ? (
                             <button
                               type="button"
                               onClick={(event) => {
-                                event.preventDefault();
                                 handleDeleteFile(file.id);
                               }}
                               className="px-2.5 py-1 rounded-lg text-xs font-semibold text-red-700 bg-red-50 hover:bg-red-100 border border-red-200"
@@ -704,7 +720,7 @@ export default function StudentDriveDashboard({ toast }) {
                             <span className="text-xs text-gray-400">-</span>
                           )}
                         </div>
-                      </a>
+                      </div>
                     ))}
                   </div>
                 )}
@@ -732,25 +748,33 @@ export default function StudentDriveDashboard({ toast }) {
                         key={file.id}
                         className="rounded-2xl border border-gray-200 bg-white p-4 hover:shadow-sm hover:border-cyan-300 transition-all"
                       >
-                        <a
-                          href={file.viewUrl || "#"}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="block"
+                        <button
+                          type="button"
+                          onClick={() => handlePreviewFile(file)}
+                          className="block text-left w-full"
                         >
                           <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 text-[11px] font-bold flex items-center justify-center">{fileEmoji(file.name)}</div>
                           <div className="mt-2 font-semibold text-gray-800 truncate">{file.name}</div>
-                        </a>
+                        </button>
                         <div className="text-xs text-gray-500 mt-1">{prettyDate(file.uploadedAt)} • {formatSize(file.size || 0)}</div>
-                        {!isRecentView && (
+                        <div className="mt-2 flex items-center gap-2">
                           <button
                             type="button"
-                            onClick={() => handleDeleteFile(file.id)}
-                            className="mt-2 px-2.5 py-1 rounded-lg text-xs font-semibold text-red-700 bg-red-50 hover:bg-red-100 border border-red-200"
+                            onClick={() => handlePreviewFile(file)}
+                            className="px-2.5 py-1 rounded-lg text-xs font-semibold text-gray-700 bg-gray-50 hover:bg-gray-100 border border-gray-200"
                           >
-                            Delete
+                            View
                           </button>
-                        )}
+                          {!isRecentView && (
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteFile(file.id)}
+                              className="px-2.5 py-1 rounded-lg text-xs font-semibold text-red-700 bg-red-50 hover:bg-red-100 border border-red-200"
+                            >
+                              Delete
+                            </button>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
