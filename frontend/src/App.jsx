@@ -65,6 +65,10 @@ export default function App() {
       if (uploadedRoom) {
         // Refresh files for that room
         loadRoomFiles(uploadedRoom);
+        // Refresh timer + mode so scanner-triggered 10m window appears instantly on PC.
+        loadRoomSession(uploadedRoom).catch((error) => {
+          console.warn("Failed to refresh room session after socket upload:", error?.message || error);
+        });
       }
     });
 
@@ -85,6 +89,57 @@ export default function App() {
       socket.emit("join-room", roomId);
     }
   }, [socket, roomId]);
+
+  // Auto-reset the current PC room as soon as its timer expires.
+  useEffect(() => {
+    if (appMode !== "quickprint" || view !== "pc") {
+      return () => {};
+    }
+
+    const currentExpiry = roomExpiryById[roomId];
+    if (!currentExpiry) {
+      return () => {};
+    }
+
+    const expiryMs = new Date(currentExpiry).getTime();
+    if (!Number.isFinite(expiryMs)) {
+      return () => {};
+    }
+
+    const resetRoomOnExpiry = () => {
+      const nextRoomId = generateRoomId();
+
+      setRoomFiles((prev) => ({
+        ...prev,
+        [roomId]: [],
+        [nextRoomId]: prev[nextRoomId] || [],
+      }));
+      setRoomExpiryById((prev) => {
+        const next = { ...prev };
+        delete next[roomId];
+        return next;
+      });
+      setRoomTimerModeById((prev) => {
+        const next = { ...prev };
+        delete next[roomId];
+        return next;
+      });
+      setRoomId(nextRoomId);
+      setRoomInput(nextRoomId);
+      toast("Room expired. Session reset.", "info");
+    };
+
+    const delayMs = expiryMs - Date.now();
+    if (delayMs <= 0) {
+      resetRoomOnExpiry();
+      return () => {};
+    }
+
+    const timeoutId = window.setTimeout(resetRoomOnExpiry, delayMs + 50);
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [appMode, view, roomId, roomExpiryById, toast]);
 
   const loadRoomFiles = async (nextRoomId) => {
     try {
@@ -141,28 +196,20 @@ export default function App() {
     }
 
     try {
-      const fetchedFiles = await loadRoomFiles(nextRoomId);
+      const activatedRoom = await activateRoomOnPc(nextRoomId);
+      setRoomExpiryById((prev) => ({
+        ...prev,
+        [nextRoomId]: activatedRoom.expiresAt,
+      }));
+      setRoomTimerModeById((prev) => ({
+        ...prev,
+        [nextRoomId]: activatedRoom.timerMode || "pc-open-10m",
+      }));
 
+      const fetchedFiles = await loadRoomFiles(nextRoomId);
       if (!fetchedFiles.length) {
         toast("Invalid Room ID. No documents found in this room.", "error");
         return;
-      }
-
-      try {
-        const activatedRoom = await activateRoomOnPc(nextRoomId);
-        setRoomExpiryById((prev) => ({
-          ...prev,
-          [nextRoomId]: activatedRoom.expiresAt,
-        }));
-        setRoomTimerModeById((prev) => ({
-          ...prev,
-          [nextRoomId]: activatedRoom.timerMode || "pc-open-10m",
-        }));
-      } catch {
-        const fallbackExpiry = getExpiryFromFiles(fetchedFiles);
-        if (fallbackExpiry) {
-          setRoomExpiryById((prev) => ({ ...prev, [nextRoomId]: fallbackExpiry }));
-        }
       }
 
       setRoomId(nextRoomId);

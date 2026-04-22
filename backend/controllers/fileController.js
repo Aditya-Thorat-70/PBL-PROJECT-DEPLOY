@@ -27,6 +27,17 @@ exports.uploadFile = async (req, res) => {
       return res.status(400).json({ message: "No file uploaded" });
     }
 
+    if (isScannerUpload) {
+      const existingRoom = await Room.findOne({ roomId: normalizedRoomId });
+      if (!existingRoom) {
+        return res.status(404).json({ message: "Room not found" });
+      }
+
+      if (new Date() > existingRoom.expiresAt) {
+        return res.status(410).json({ message: "Room has expired" });
+      }
+    }
+
     let fileName = req.file.filename;
     let filePath = req.file.path;
     let originalName = req.file.originalname;
@@ -111,7 +122,16 @@ exports.uploadFile = async (req, res) => {
 
 exports.getFilesByRoom = async (req, res) => {
   try {
-    const { roomId } = req.params;
+    const roomId = String(req.params.roomId || "").toUpperCase().trim();
+
+    const room = await Room.findOne({ roomId });
+    if (!room) {
+      return res.status(404).json({ message: "Room not found" });
+    }
+
+    if (new Date() > room.expiresAt) {
+      return res.status(410).json({ message: "Room has expired" });
+    }
 
     const files = await File.find({ roomId }).sort({ uploadedAt: -1 });
 
