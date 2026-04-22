@@ -29,11 +29,10 @@ exports.uploadFile = async (req, res) => {
 
     if (isScannerUpload) {
       const existingRoom = await Room.findOne({ roomId: normalizedRoomId });
-      if (!existingRoom) {
-        return res.status(404).json({ message: "Room not found" });
-      }
 
-      if (new Date() > existingRoom.expiresAt) {
+      // Scanner links may point to a room id that is not yet persisted in DB.
+      // Allow first upload to create it, but block reuse of an already-expired room.
+      if (existingRoom && new Date() > existingRoom.expiresAt) {
         return res.status(410).json({ message: "Room has expired" });
       }
     }
