@@ -47,7 +47,9 @@ export const getGoogleViewerUrl = (fileUrl) => {
 
   // Google Docs Viewer can preview only publicly reachable URLs.
   // If your backend file URL is private/auth-protected, the preview will fail.
-  return `https://docs.google.com/gview?url=${encodeURIComponent(parsed.href)}&embedded=true`;
+  // Use full viewer page instead of embedded mode to open directly in the
+  // printable Google Viewer tab and avoid extra open steps.
+  return `https://docs.google.com/viewerng/viewer?url=${encodeURIComponent(parsed.href)}&hl=en&chrome=true`;
 };
 
 export const resolveFileViewerUrl = (fileUrl) => {
