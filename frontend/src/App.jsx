@@ -8,6 +8,7 @@ import ToastContainer from "./components/Toast";
 import { useToast } from "./hooks/useToast";
 import { generateRoomId } from "./utils/helpers";
 import { activateRoomOnPc, createRoom, fetchFilesByRoom, fetchRoomById, uploadFileToRoom } from "./utils/api";
+import { openFileViewer } from "./utils/fileViewer";
 import { SOCKET_URL } from "./utils/config";
 
 export default function App() {
@@ -233,7 +234,11 @@ export default function App() {
       return;
     }
 
-    window.open(file.viewUrl, "_blank", "noopener,noreferrer");
+    const viewer = openFileViewer(file.viewUrl);
+    if (!viewer.ok) {
+      toast(viewer.error || "Unable to open file preview", "error");
+      return;
+    }
   };
 
   const handlePrint = (file) => {
@@ -249,14 +254,14 @@ export default function App() {
   const handleUpload = async (selectedFile, selectedRoomId) => {
     try {
       let targetRoomId = (selectedRoomId || "").toUpperCase().trim();
-      const hasExplicitRoom = Boolean(targetRoomId);
 
       if (!targetRoomId) {
         targetRoomId = await createRoom();
         toast(`Room created: ${targetRoomId}`, "info");
       }
 
-      const uploadSource = hasExplicitRoom ? "scanner" : "mobile";
+      // Mobile flow should always use standard expiry (48h), even when room id is prefilled via link.
+      const uploadSource = "mobile";
 
       const uploadedFile = await uploadFileToRoom({ roomId: targetRoomId, file: selectedFile, uploadSource });
 
