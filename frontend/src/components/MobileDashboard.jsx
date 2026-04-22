@@ -1,7 +1,8 @@
 import UploadForm from "./UploadForm";
 
-export default function MobileDashboard({ onUpload, initialRoomId }) {
+export default function MobileDashboard({ onUpload, initialRoomId, uploadSource = "mobile" }) {
   const detectedRoomId = initialRoomId || null;
+  const isScannerMode = uploadSource === "scanner";
 
   return (
     <div className="max-w-md mx-auto px-4 py-6">
@@ -22,10 +23,15 @@ export default function MobileDashboard({ onUpload, initialRoomId }) {
             Use Google Lens QR link to open with a room, or upload now to auto-generate a new Room ID.
           </p>
         )}
+        {isScannerMode && (
+          <p className="text-xs text-amber-700 mt-2 font-semibold">
+            Scanner upload mode: this room will use a 10-minute timer.
+          </p>
+        )}
       </div>
 
       <div className="mt-4">
-        <UploadForm roomId={detectedRoomId} onUpload={onUpload} />
+        <UploadForm roomId={detectedRoomId} onUpload={onUpload} uploadSource={uploadSource} />
       </div>
     </div>
   );

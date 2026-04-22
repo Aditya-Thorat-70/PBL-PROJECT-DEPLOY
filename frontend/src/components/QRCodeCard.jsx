@@ -2,7 +2,7 @@ import QRCodeSVG from "./QRCodeSVG";
 
 export default function QRCodeCard({ roomId, onGenerate, showRoomId = false }) {
   const mobileBaseUrl = import.meta.env.VITE_MOBILE_URL || window.location.origin;
-  const mobileUploadUrl = `${mobileBaseUrl}/?view=mobile&room=${encodeURIComponent(roomId)}`;
+  const mobileUploadUrl = `${mobileBaseUrl}/?view=mobile&room=${encodeURIComponent(roomId)}&source=scanner`;
   const displayedRoomId = showRoomId ? roomId : "*".repeat(String(roomId || "").length);
 
   return (

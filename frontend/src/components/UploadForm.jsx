@@ -75,7 +75,7 @@ function SuccessScreen({ fileCount, lastFileName, roomId, roomTimerMode, roomExp
   );
 }
 
-export default function UploadForm({ roomId: defaultRoom, onUpload, onComplete }) {
+export default function UploadForm({ roomId: defaultRoom, onUpload, onComplete, uploadSource = "mobile" }) {
   const [room, setRoom] = useState(defaultRoom || "");
   const [files, setFiles] = useState([]);
   const [dragging, setDragging] = useState(false);
@@ -121,7 +121,7 @@ export default function UploadForm({ roomId: defaultRoom, onUpload, onComplete }
 
       for (let index = 0; index < files.length; index += 1) {
         const currentFile = files[index];
-        const uploaded = await onUpload(currentFile, uploadRoom);
+        const uploaded = await onUpload(currentFile, uploadRoom, uploadSource);
         lastUploadedName = uploaded?.name || currentFile.name;
 
         if (!uploadRoom && uploaded?.room) {

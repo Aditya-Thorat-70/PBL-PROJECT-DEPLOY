@@ -18,6 +18,7 @@ export default function App() {
   const [roomId, setRoomId] = useState(initialRoomId);
   const [roomInput, setRoomInput] = useState(initialRoomId);
   const [mobilePrefillRoomId, setMobilePrefillRoomId] = useState(null);
+  const [mobileUploadSource, setMobileUploadSource] = useState("mobile");
   const [roomFiles, setRoomFiles] = useState({ [initialRoomId]: [] });
   const [roomExpiryById, setRoomExpiryById] = useState({});
   const [roomTimerModeById, setRoomTimerModeById] = useState({});
@@ -32,6 +33,7 @@ export default function App() {
     const requestedView = params.get("view");
     const requestedMode = params.get("mode");
     const requestedRoom = (params.get("room") || "").toUpperCase().trim();
+    const requestedSource = (params.get("source") || "").toLowerCase().trim();
 
     if (requestedView === "mobile") {
       setView("mobile");
@@ -43,6 +45,12 @@ export default function App() {
 
     if (/^[A-Z0-9]{6}$/.test(requestedRoom)) {
       setMobilePrefillRoomId(requestedRoom);
+    }
+
+    if (requestedSource === "scanner") {
+      setMobileUploadSource("scanner");
+    } else {
+      setMobileUploadSource("mobile");
     }
   }, []);
 
@@ -251,7 +259,7 @@ export default function App() {
     toast(`Ready to print: ${file.name}`, "success");
   };
 
-  const handleUpload = async (selectedFile, selectedRoomId) => {
+  const handleUpload = async (selectedFile, selectedRoomId, requestedUploadSource = "mobile") => {
     try {
       let targetRoomId = (selectedRoomId || "").toUpperCase().trim();
 
@@ -260,8 +268,7 @@ export default function App() {
         toast(`Room created: ${targetRoomId}`, "info");
       }
 
-      // Mobile flow should always use standard expiry (48h), even when room id is prefilled via link.
-      const uploadSource = "mobile";
+      const uploadSource = requestedUploadSource === "scanner" ? "scanner" : "mobile";
 
       const uploadedFile = await uploadFileToRoom({ roomId: targetRoomId, file: selectedFile, uploadSource });
 
@@ -338,7 +345,11 @@ export default function App() {
                 onPrint={handlePrint}
               />
             ) : (
-              <MobileDashboard onUpload={handleUpload} initialRoomId={mobilePrefillRoomId} />
+              <MobileDashboard
+                onUpload={handleUpload}
+                initialRoomId={mobilePrefillRoomId}
+                uploadSource={mobileUploadSource}
+              />
             )}
           </>
         )}
