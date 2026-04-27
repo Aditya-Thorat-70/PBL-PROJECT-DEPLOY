@@ -31,13 +31,13 @@ export default function FileCard({ file, onDelete, onView, onPrint }) {
           onClick={() => onView(file)}
           className="px-3 py-1.5 rounded-lg text-xs font-medium text-gray-500 border border-gray-200 hover:bg-gray-50 hover:text-gray-800 transition-all"
         >
-          View
+          Print
         </button>
         <button
           onClick={() => onPrint(file)}
           className="px-3 py-1.5 rounded-lg text-xs font-medium text-white bg-gradient-to-r from-blue-600 to-violet-600 hover:shadow-md hover:-translate-y-0.5 transition-all"
         >
-          🖨️
+          ⬇️
         </button>
         <button
           onClick={() => onDelete(file.id)}
