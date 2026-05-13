@@ -83,17 +83,18 @@ exports.uploadFile = async (req, res) => {
       Date.now() + (isScannerUpload ? ROOM_EXPIRY_10_MINUTES_MS : ROOM_EXPIRY_48_HOURS_MS)
     );
 
+    // Avoid writing the same path in both $set and $setOnInsert (MongoDB conflict).
+    // Only set `isInUse` in $set when this is a scanner upload.
     await Room.updateOne(
       { roomId: normalizedRoomId },
       {
         $set: {
           expiresAt,
           timerMode: roomTimerMode,
-          ...(isScannerUpload && { isInUse: true }),
+          ...(isScannerUpload ? { isInUse: true } : {}),
         },
         $setOnInsert: {
           roomId: normalizedRoomId,
-          ...(isScannerUpload && { isInUse: true }),
         },
       },
       { upsert: true }
