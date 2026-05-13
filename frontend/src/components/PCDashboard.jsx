@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import QRCodeCard from "./QRCodeCard";
 import FileList from "./FileList";
 import SessionTimer from "./SessionTimer";
@@ -33,95 +33,88 @@ export default function PCDashboard({
 
   const timerModeMeta = roomTimerMode ? timerModeMap[roomTimerMode] || null : null;
   const [showInputRoomId, setShowInputRoomId] = useState(false);
-  const maskedRoomId = useMemo(() => (roomId ? "*".repeat(String(roomId).length) : ""), [roomId]);
-
-  const stats = [
-    { label: "Files Ready", val: files.length, icon: "📑" },
-    { label: "Room ID", val: maskedRoomId, icon: "🔑" },
-    { label: "Status", val: "Online", icon: "🟢" },
-  ];
 
   return (
     <div className="max-w-6xl mx-auto px-4 md:px-6 py-6">
-      {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6">
-        {stats.map((s, i) => (
-          <div
-            key={i}
-            className="bg-white rounded-2xl border border-gray-100 p-4 sm:p-5 animate-fadeIn"
-            style={{ animationDelay: `${i * 80}ms` }}
+      {/* Main 2-column grid */}
+      <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-5 lg:gap-6">
+        {/* Left Column: QR Code & Generate */}
+        <div className="flex flex-col gap-5">
+          <QRCodeCard roomId={roomId} onGenerate={onGenerate} showRoomId={false} />
+          
+          <button
+            onClick={onGenerate}
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all"
           >
-            <div className="text-2xl mb-2">{s.icon}</div>
-            <div
-              className={`text-xl sm:text-2xl font-extrabold bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent break-words ${
-                s.label === "Room ID" ? "font-room-code tracking-[0.14em]" : ""
-              }`}
-            >
-              {s.val}
-            </div>
-            <div className="text-xs text-gray-400 mt-0.5 font-medium">{s.label}</div>
-          </div>
-        ))}
-      </div>
+            ↺ Generate New Room
+          </button>
+        </div>
 
-      {/* Main grid */}
-      <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-5">
-        <QRCodeCard roomId={roomId} onGenerate={onGenerate} showRoomId={false} />
-
+        {/* Right Column: Files & Upload */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-6">
-          <div className="mb-5 flex flex-col gap-3">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-              <h2 className="font-extrabold text-xl text-gray-900" style={{ fontFamily: "Plus Jakarta Sans, Segoe UI, sans-serif" }}>
-                Uploaded Files
-              </h2>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setShowInputRoomId((prev) => !prev)}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all"
-                  title={showInputRoomId ? "Hide Input ID" : "Show Input ID"}
-                  aria-label={showInputRoomId ? "Hide Input ID" : "Show Input ID"}
-                >
-                  👁 {showInputRoomId ? "Hide ID" : "Show ID"}
-                </button>
-                {files.length > 0 && (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">
-                    {files.length} file{files.length !== 1 ? "s" : ""}
-                  </span>
-                )}
+          {/* Header with stats */}
+          <div className="mb-5 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="flex flex-col">
+                <div className="text-3xl font-extrabold text-gray-900">
+                  {files.length}
+                </div>
+                <div className="text-xs text-gray-500 font-medium">FILES READY</div>
+              </div>
+              <div className="w-px h-12 bg-gray-200" />
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-100">
+                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                <span className="text-sm font-semibold text-green-700">ONLINE</span>
               </div>
             </div>
-
-            <div className="flex flex-col sm:flex-row gap-2">
-              <input
-                type={showInputRoomId ? "text" : "password"}
-                value={roomInput}
-                onChange={(e) => onRoomInputChange(e.target.value.toUpperCase())}
-                placeholder="Enter Room ID"
-                maxLength={6}
-                className="font-room-code w-full sm:max-w-[220px] px-3 py-2 rounded-xl border border-gray-200 text-sm font-bold tracking-widest text-gray-900 bg-white focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all"
-                autoComplete="off"
-                autoCorrect="off"
-                spellCheck={false}
-              />
-              <button
-                onClick={onOpenRoom}
-                className="px-4 py-2 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-violet-600 hover:shadow-md hover:-translate-y-0.5 transition-all"
-              >
-                Open Room
-              </button>
-            </div>
-
-            {roomExpiresAt && (
-              <div className="pt-1 flex flex-wrap items-center gap-2">
-                <SessionTimer expiresAt={roomExpiresAt} roomId={roomId} compact />
-                {timerModeMeta && (
-                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${timerModeMeta.className}`}>
-                    {timerModeMeta.label}
-                  </span>
-                )}
-              </div>
-            )}
+            <button
+              onClick={() => setShowInputRoomId((prev) => !prev)}
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all"
+              title={showInputRoomId ? "Hide ID" : "Show ID"}
+            >
+              👁 {showInputRoomId ? "Hide ID" : "Show ID"}
+            </button>
           </div>
+
+          {/* Title */}
+          <h2 className="font-extrabold text-xl text-gray-900 mb-4" style={{ fontFamily: "Plus Jakarta Sans, Segoe UI, sans-serif" }}>
+            Uploaded Files
+          </h2>
+
+          {/* Room ID Input & Open Button */}
+          <div className="flex flex-col sm:flex-row gap-2 mb-5">
+            <input
+              type={showInputRoomId ? "text" : "password"}
+              value={roomInput}
+              onChange={(e) => onRoomInputChange(e.target.value.toUpperCase())}
+              placeholder="Enter Room ID"
+              maxLength={6}
+              className="font-room-code flex-1 px-3 py-2.5 rounded-xl border border-gray-200 text-sm font-bold tracking-widest text-gray-900 bg-white focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all"
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck={false}
+            />
+            <button
+              onClick={onOpenRoom}
+              className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-violet-600 hover:shadow-lg hover:-translate-y-0.5 transition-all whitespace-nowrap"
+            >
+              Open Room
+            </button>
+          </div>
+
+          {/* Session Timer */}
+          {roomExpiresAt && (
+            <div className="mb-4 flex flex-wrap items-center gap-2 pb-4 border-b border-gray-100">
+              <SessionTimer expiresAt={roomExpiresAt} roomId={roomId} compact />
+              {timerModeMeta && (
+                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${timerModeMeta.className}`}>
+                  {timerModeMeta.label}
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* File List */}
           <FileList files={files} onDelete={onDelete} onView={onView} onPrint={onPrint} />
         </div>
       </div>

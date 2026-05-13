@@ -1,6 +1,6 @@
 import QRCodeSVG from "./QRCodeSVG";
 
-export default function QRCodeCard({ roomId, onGenerate, showRoomId = false }) {
+export default function QRCodeCard({ roomId, onGenerate, showRoomId = false, hideGenerateButton = true }) {
   const mobileBaseUrl = import.meta.env.VITE_MOBILE_URL || window.location.origin;
   const mobileUploadUrl = `${mobileBaseUrl}/?view=mobile&room=${encodeURIComponent(roomId)}&source=scanner`;
   const displayedRoomId = showRoomId ? roomId : "*".repeat(String(roomId || "").length);
@@ -20,21 +20,25 @@ export default function QRCodeCard({ roomId, onGenerate, showRoomId = false }) {
       </div>
 
       {/* Room ID */}
-      <div className="text-center">
-        <div className="text-xs text-gray-400 uppercase tracking-widest font-semibold mb-1">Room ID</div>
-        <div
-          className="font-room-code text-3xl font-extrabold tracking-[0.18em] bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent"
-        >
-          {displayedRoomId}
+      {showRoomId && (
+        <div className="text-center">
+          <div className="text-xs text-gray-400 uppercase tracking-widest font-semibold mb-1">Room ID</div>
+          <div
+            className="font-room-code text-3xl font-extrabold tracking-[0.18em] bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent"
+          >
+            {displayedRoomId}
+          </div>
         </div>
-      </div>
+      )}
 
-      <button
-        onClick={onGenerate}
-        className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium text-gray-500 border border-gray-200 hover:bg-gray-50 hover:text-gray-800 transition-all"
-      >
-        <span>↻</span> Generate New Room
-      </button>
+      {!hideGenerateButton && (
+        <button
+          onClick={onGenerate}
+          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium text-gray-500 border border-gray-200 hover:bg-gray-50 hover:text-gray-800 transition-all"
+        >
+          <span>↻</span> Generate New Room
+        </button>
+      )}
     </div>
   );
 }
