@@ -282,7 +282,19 @@ export default function UploadForm({ roomId: defaultRoom, onUpload, onComplete, 
                   </button>
                 </div>
               ))}
-              <p className="text-xs text-gray-400 mt-1">{files.length} file{files.length !== 1 ? "s" : ""} selected</p>
+              <div className="flex items-center justify-between mt-1">
+                <p className="text-xs text-gray-400">{files.length} file{files.length !== 1 ? "s" : ""} selected</p>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    inputRef.current && inputRef.current.click();
+                  }}
+                  className="ml-2 px-3 py-1.5 rounded-lg text-xs font-medium text-indigo-700 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 transition-all"
+                >
+                  + Add files
+                </button>
+              </div>
             </div>
           ) : (
             <>

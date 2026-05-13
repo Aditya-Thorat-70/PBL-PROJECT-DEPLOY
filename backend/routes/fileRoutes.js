@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { upload, handleUploadErrors } = require("../middleware/uploadMiddleware");
-const { uploadFile, getFilesByRoom, downloadFile } = require("../controllers/fileController");
+const { uploadFile, getFilesByRoom, downloadFile, deleteFile } = require("../controllers/fileController");
 
 // Single file upload
 router.post("/upload", (req, res, next) => {
@@ -13,5 +13,8 @@ router.get("/room/:roomId", getFilesByRoom);
 
 // Download a specific file
 router.get("/download/:fileId", downloadFile);
+
+// Delete a specific file
+router.delete("/:fileId", deleteFile);
 
 module.exports = router;

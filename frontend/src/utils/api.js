@@ -110,6 +110,16 @@ export const uploadFileToRoom = async ({ roomId, file, uploadSource = "mobile" }
   };
 };
 
+export const deleteFile = async (fileId) => {
+  const response = await fetch(`${API_BASE_URL}/api/files/${encodeURIComponent(fileId)}`, {
+    method: "DELETE",
+  });
+
+  await ensureOk(response);
+  const data = await response.json();
+  return data;
+};
+
 const mapStudentDrive = (drive) => ({
   id: drive.id,
   driveId: drive.driveId,

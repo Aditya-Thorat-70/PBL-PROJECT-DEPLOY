@@ -7,7 +7,7 @@ import StudentDriveDashboard from "./components/StudentDriveDashboard";
 import ToastContainer from "./components/Toast";
 import { useToast } from "./hooks/useToast";
 import { generateRoomId } from "./utils/helpers";
-import { activateRoomOnPc, createRoom, fetchFilesByRoom, fetchRoomById, uploadFileToRoom } from "./utils/api";
+import { activateRoomOnPc, createRoom, fetchFilesByRoom, fetchRoomById, uploadFileToRoom, deleteFile } from "./utils/api";
 import { openFileViewer } from "./utils/fileViewer";
 import { SOCKET_URL } from "./utils/config";
 
@@ -88,6 +88,24 @@ export default function App() {
         loadRoomSession(uploadedRoom).catch((error) => {
           console.warn("Failed to refresh room session after socket upload:", error?.message || error);
         });
+      }
+    });
+
+    newSocket.on("file-deleted", (data) => {
+      try {
+        const deletedRoom = data.roomId;
+        const deletedFileId = data.fileId;
+        if (deletedRoom) {
+          setRoomFiles((prev) => ({
+            ...prev,
+            [deletedRoom]: (prev[deletedRoom] || []).filter((f) => f.id !== deletedFileId),
+          }));
+          if (roomId === deletedRoom) {
+            loadRoomFiles(deletedRoom).catch(() => {});
+          }
+        }
+      } catch (e) {
+        console.warn("Failed to handle file-deleted socket event", e);
       }
     });
 
@@ -248,12 +266,18 @@ export default function App() {
     }
   };
 
-  const handleDelete = (id) => {
-    setRoomFiles((prev) => ({
-      ...prev,
-      [roomId]: (prev[roomId] || []).filter((x) => x.id !== id),
-    }));
-    toast("File deleted", "success");
+  const handleDelete = async (id) => {
+    try {
+      await deleteFile(id);
+      setRoomFiles((prev) => ({
+        ...prev,
+        [roomId]: (prev[roomId] || []).filter((x) => x.id !== id),
+      }));
+      toast("File deleted", "success");
+    } catch (error) {
+      console.error("Failed to delete file:", error);
+      toast(error?.message || "Unable to delete file", "error");
+    }
   };
 
   const handleView = (file) => {

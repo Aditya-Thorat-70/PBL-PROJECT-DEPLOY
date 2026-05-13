@@ -180,3 +180,41 @@ exports.downloadFile = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+exports.deleteFile = async (req, res) => {
+  try {
+    const { fileId } = req.params;
+
+    const file = await File.findById(fileId);
+    if (!file) {
+      return res.status(404).json({ message: "File not found" });
+    }
+
+    const filePath = path.resolve(file.filePath || "");
+
+    // Delete physical file if exists
+    try {
+      if (filePath && fs.existsSync(filePath)) {
+        await fsPromises.unlink(filePath);
+      }
+    } catch (unlinkErr) {
+      console.warn("[Delete Warn] Failed to remove file from disk:", unlinkErr.message);
+    }
+
+    const roomId = file.roomId;
+
+    // Delete DB record
+    await File.deleteOne({ _id: fileId });
+
+    // Emit socket event to notify other clients in the room
+    const io = req.app.get('io');
+    if (io && roomId) {
+      io.to(roomId).emit('file-deleted', { fileId, roomId });
+    }
+
+    return res.json({ message: 'File deleted', fileId, roomId });
+  } catch (error) {
+    console.error('[Delete Error]', error?.message || error);
+    return res.status(500).json({ message: error.message || 'Unable to delete file' });
+  }
+};
