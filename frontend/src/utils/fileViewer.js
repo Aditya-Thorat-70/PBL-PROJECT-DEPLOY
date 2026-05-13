@@ -60,6 +60,20 @@ export const resolveFileViewerUrl = (fileUrl) => {
 
   const ext = getFileExtensionFromUrl(parsed.href);
   if (!ext) {
+    const isStudentDriveApiView =
+      parsed.pathname.includes("/api/student-drive/files/") &&
+      parsed.pathname.endsWith("/view");
+
+    if (isStudentDriveApiView) {
+      return {
+        ok: true,
+        error: "",
+        mode: "direct",
+        viewerUrl: parsed.href,
+        ext: "",
+      };
+    }
+
     return { ok: false, error: "Missing file extension", mode: null, viewerUrl: "" };
   }
 
