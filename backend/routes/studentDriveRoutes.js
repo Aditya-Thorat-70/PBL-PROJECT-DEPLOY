@@ -10,11 +10,13 @@ const {
   createFolder,
   addFolderNote,
   uploadFolderFile,
+  viewFolderFile,
   deleteFolderFile,
 } = require("../controllers/studentDriveController");
 
 router.post("/create", createDrive);
 router.post("/login", loginDrive);
+router.get("/files/:fileId/view", viewFolderFile);
 
 router.use(studentDriveAuth);
 

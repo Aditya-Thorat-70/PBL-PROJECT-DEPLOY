@@ -2,6 +2,52 @@ const StudentDrive = require("../models/StudentDrive");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const fs = require("fs");
+const fsPromises = require("fs/promises");
+const mongoose = require("mongoose");
+const { GridFSBucket, ObjectId } = require("mongodb");
+
+let studentDriveBucket = null;
+
+const getStudentDriveBucket = () => {
+  if (!mongoose.connection?.db) {
+    throw new Error("Database connection is not ready");
+  }
+
+  if (!studentDriveBucket) {
+    studentDriveBucket = new GridFSBucket(mongoose.connection.db, {
+      bucketName: "studentDriveFiles",
+    });
+  }
+
+  return studentDriveBucket;
+};
+
+const uploadToGridFs = (localPath, filename, contentType) =>
+  new Promise((resolve, reject) => {
+    const bucket = getStudentDriveBucket();
+    const readStream = fs.createReadStream(localPath);
+    const writeStream = bucket.openUploadStream(filename, {
+      contentType,
+      metadata: { source: "student-drive" },
+    });
+
+    readStream.on("error", reject);
+    writeStream.on("error", reject);
+    writeStream.on("finish", () => resolve(writeStream.id));
+
+    readStream.pipe(writeStream);
+  });
+
+const findDriveFileById = (drive, fileId) => {
+  for (const folder of drive.folders || []) {
+    const fileSubdoc = (folder.files || []).id(fileId);
+    if (fileSubdoc) {
+      return { folder, fileSubdoc };
+    }
+  }
+
+  return null;
+};
 
 const formatDriveResponse = (drive) => ({
   id: drive._id,
@@ -20,7 +66,7 @@ const formatDriveResponse = (drive) => ({
       size: file.fileSize,
       mimeType: file.mimeType,
       uploadedAt: file.uploadedAt,
-      viewUrl: `/uploads/${file.fileName}`,
+      viewUrl: `/api/student-drive/files/${file._id}/view`,
     })),
     notes: (folder.notes || []).map((note) => ({
       id: note._id,
@@ -269,10 +315,23 @@ exports.uploadFolderFile = async (req, res) => {
       return res.status(404).json({ message: "Folder not found" });
     }
 
+    let gridFsId = null;
+    try {
+      gridFsId = await uploadToGridFs(req.file.path, req.file.filename, req.file.mimetype);
+    } finally {
+      try {
+        await fsPromises.unlink(req.file.path);
+      } catch {
+        // Best-effort local temp cleanup.
+      }
+    }
+
     folder.files.push({
+      storageType: "gridfs",
+      gridFsId,
       fileName: req.file.filename,
       originalName: req.file.originalname,
-      filePath: req.file.path,
+      filePath: `gridfs:${gridFsId}`,
       fileSize: req.file.size,
       mimeType: req.file.mimetype,
     });
@@ -282,6 +341,55 @@ exports.uploadFolderFile = async (req, res) => {
     return res.status(201).json({ drive: formatDriveResponse(drive) });
   } catch (error) {
     return res.status(500).json({ message: error.message || "Unable to upload file" });
+  }
+};
+
+exports.viewFolderFile = async (req, res) => {
+  try {
+    const fileId = req.params.fileId;
+    if (!ObjectId.isValid(String(fileId))) {
+      return res.status(400).json({ message: "Invalid file ID" });
+    }
+
+    const drive = await StudentDrive.findOne({ "folders.files._id": fileId });
+    if (!drive) {
+      return res.status(404).json({ message: "File not found" });
+    }
+
+    const located = findDriveFileById(drive, fileId);
+    if (!located?.fileSubdoc) {
+      return res.status(404).json({ message: "File not found" });
+    }
+
+    const fileSubdoc = located.fileSubdoc;
+    const fileName = fileSubdoc.originalName || "document";
+    const mimeType = fileSubdoc.mimeType || "application/octet-stream";
+
+    if (String(fileSubdoc.storageType || "") === "gridfs" && fileSubdoc.gridFsId) {
+      const bucket = getStudentDriveBucket();
+
+      res.setHeader("Content-Type", mimeType);
+      res.setHeader("Content-Disposition", `inline; filename=\"${fileName}\"`);
+
+      const downloadStream = bucket.openDownloadStream(new ObjectId(fileSubdoc.gridFsId));
+      downloadStream.on("error", () => {
+        if (!res.headersSent) {
+          res.status(404).json({ message: "File not found" });
+        }
+      });
+
+      return downloadStream.pipe(res);
+    }
+
+    // Backward compatibility for legacy disk-stored Student Drive files.
+    const diskPath = fileSubdoc.filePath;
+    if (diskPath && fs.existsSync(diskPath)) {
+      return res.sendFile(diskPath);
+    }
+
+    return res.status(404).json({ message: "File not found" });
+  } catch (error) {
+    return res.status(500).json({ message: error.message || "Unable to open file" });
   }
 };
 
@@ -311,8 +419,17 @@ exports.deleteFolderFile = async (req, res) => {
       return res.status(404).json({ message: "File not found" });
     }
 
+    if (String(fileSubdoc.storageType || "") === "gridfs" && fileSubdoc.gridFsId) {
+      try {
+        const bucket = getStudentDriveBucket();
+        await bucket.delete(new ObjectId(fileSubdoc.gridFsId));
+      } catch (deleteErr) {
+        console.error("[StudentDrive Delete Warn] Failed to remove GridFS file:", deleteErr.message);
+      }
+    }
+
     const diskPath = fileSubdoc.filePath;
-    if (diskPath && fs.existsSync(diskPath)) {
+    if (diskPath && !String(diskPath).startsWith("gridfs:") && fs.existsSync(diskPath)) {
       try {
         fs.unlinkSync(diskPath);
       } catch (unlinkError) {

@@ -3,9 +3,20 @@ const StudentDrive = require("../models/StudentDrive");
 const fs = require("fs");
 const path = require("path");
 
-const uploadsDir = path.resolve("uploads");
-const fileRetentionHours = Number(process.env.FILE_RETENTION_HOURS || process.env.ROOM_EXPIRY_HOURS || 3);
-const staleThresholdMs = fileRetentionHours * 60 * 60 * 1000;
+const uploadsDir = path.resolve(__dirname, "..", "uploads");
+const parseHours = (value, fallback) => {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return fallback;
+  }
+  return parsed;
+};
+
+const orphanRetentionHours = parseHours(
+  process.env.ORPHAN_FILE_RETENTION_HOURS || process.env.FILE_RETENTION_HOURS,
+  24
+);
+const staleThresholdMs = orphanRetentionHours * 60 * 60 * 1000;
 
 /**
  * Cleanup expired files: removes both DB records and physical files from disk
@@ -14,6 +25,7 @@ const cleanupExpiredFiles = async () => {
   try {
     let expiredFiles = [];
     let activeFiles = [];
+    let canRunOrphanCleanup = true;
 
     try {
       const now = new Date();
@@ -39,6 +51,7 @@ const cleanupExpiredFiles = async () => {
         });
       });
     } catch (driveError) {
+      canRunOrphanCleanup = false;
       console.error("[Cleanup Warn] Could not load Student Drive files for orphan-protection:", driveError.message);
     }
 
@@ -61,7 +74,7 @@ const cleanupExpiredFiles = async () => {
 
     // Also remove orphan disk files older than retention threshold that no longer exist in DB.
     let orphanDeletedCount = 0;
-    if (fs.existsSync(uploadsDir)) {
+    if (canRunOrphanCleanup && fs.existsSync(uploadsDir)) {
       const diskFiles = fs.readdirSync(uploadsDir, { withFileTypes: true });
 
       for (const entry of diskFiles) {
@@ -84,6 +97,8 @@ const cleanupExpiredFiles = async () => {
           console.error(`[Cleanup Error] Failed to delete orphan file ${entry.name}:`, err.message);
         }
       }
+    } else if (!canRunOrphanCleanup) {
+      console.warn("[Cleanup Warn] Orphan disk cleanup skipped to protect Student Drive files.");
     }
 
     if (deletedEntries.length === 0 && orphanDeletedCount === 0) {

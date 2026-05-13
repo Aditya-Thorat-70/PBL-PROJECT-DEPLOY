@@ -2,6 +2,8 @@ const mongoose = require("mongoose");
 
 const driveFileSchema = new mongoose.Schema(
   {
+    storageType: { type: String, enum: ["disk", "gridfs"], default: "gridfs" },
+    gridFsId: { type: mongoose.Schema.Types.ObjectId, default: null },
     fileName: { type: String, required: true },
     originalName: { type: String, required: true },
     filePath: { type: String, required: true },
