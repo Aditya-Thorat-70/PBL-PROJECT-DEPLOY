@@ -75,7 +75,7 @@ function SuccessScreen({ fileCount, lastFileName, roomId, roomTimerMode, roomExp
   );
 }
 
-export default function UploadForm({ roomId: defaultRoom, onUpload, onComplete, uploadSource = "mobile" }) {
+export default function UploadForm({ roomId: defaultRoom, onUpload, onComplete, uploadSource = "mobile", roomInUse = false }) {
   const [room, setRoom] = useState(defaultRoom || "");
   const [files, setFiles] = useState([]);
   const [dragging, setDragging] = useState(false);
@@ -111,21 +111,30 @@ export default function UploadForm({ roomId: defaultRoom, onUpload, onComplete, 
 
   const handleSubmit = async () => {
     if (!files.length) return;
+    
+    const isScannerMode = uploadSource === "scanner";
+    const uploadRoom = (room || "").toUpperCase().trim();
+    
+    // Check if room is in use for scanner uploads
+    if (isScannerMode && uploadRoom && roomInUse) {
+      return;
+    }
+    
     setLoading(true);
     setProgress(0);
     setCopied(false);
 
     try {
       let lastUploadedName = "";
-      let uploadRoom = (room || "").toUpperCase().trim();
+      let finalUploadRoom = uploadRoom;
 
       for (let index = 0; index < files.length; index += 1) {
         const currentFile = files[index];
-        const uploaded = await onUpload(currentFile, uploadRoom, uploadSource);
+        const uploaded = await onUpload(currentFile, finalUploadRoom, uploadSource);
         lastUploadedName = uploaded?.name || currentFile.name;
 
-        if (!uploadRoom && uploaded?.room) {
-          uploadRoom = uploaded.room;
+        if (!finalUploadRoom && uploaded?.room) {
+          finalUploadRoom = uploaded.room;
           setRoom(uploaded.room);
         }
 
@@ -293,13 +302,25 @@ export default function UploadForm({ roomId: defaultRoom, onUpload, onComplete, 
       </div>
 
       {/* Submit */}
-      <button
-        onClick={handleSubmit}
-        disabled={!files.length}
-        className="w-full py-3.5 sm:py-4 rounded-2xl text-sm sm:text-base font-semibold text-white bg-gradient-to-r from-cyan-500 to-indigo-600 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:translate-y-0"
-      >
-        📤 Upload {files.length > 1 ? `${files.length} Files` : "File"} & Send to Printer
-      </button>
+      {(() => {
+        const isScannerMode = uploadSource === "scanner";
+        const uploadRoom = (room || "").toUpperCase().trim();
+        const isRoomInUseForScanner = isScannerMode && uploadRoom && roomInUse;
+        const isDisabled = !files.length || isRoomInUseForScanner;
+        const buttonText = isRoomInUseForScanner
+          ? "❌ Room In Use - Wait or Try Another"
+          : `📤 Upload ${files.length > 1 ? `${files.length} Files` : "File"} & Send to Printer`;
+
+        return (
+          <button
+            onClick={handleSubmit}
+            disabled={isDisabled}
+            className="w-full py-3.5 sm:py-4 rounded-2xl text-sm sm:text-base font-semibold text-white bg-gradient-to-r from-cyan-500 to-indigo-600 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:translate-y-0"
+          >
+            {buttonText}
+          </button>
+        );
+      })()}
     </div>
   );
 }

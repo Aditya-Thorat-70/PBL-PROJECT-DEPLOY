@@ -35,6 +35,17 @@ exports.uploadFile = async (req, res) => {
       if (existingRoom && new Date() > existingRoom.expiresAt) {
         return res.status(410).json({ message: "Room has expired" });
       }
+
+      // Block new uploads if the scanner room is already in use
+      // But allow uploads if there are already files in the room (same upload session/batch)
+      if (existingRoom && existingRoom.isInUse && existingRoom.timerMode === "scanner-10m") {
+        const fileCount = await File.countDocuments({ roomId: normalizedRoomId });
+        if (fileCount === 0) {
+          // Room is locked but empty - this is a completely new user trying to access locked room
+          return res.status(429).json({ message: "This scanner room is already in use. Please wait for it to expire or try a different room." });
+        }
+        // Room has files - this is the same upload session continuing, allow it
+      }
     }
 
     let fileName = req.file.filename;
@@ -78,9 +89,11 @@ exports.uploadFile = async (req, res) => {
         $set: {
           expiresAt,
           timerMode: roomTimerMode,
+          ...(isScannerUpload && { isInUse: true }),
         },
         $setOnInsert: {
           roomId: normalizedRoomId,
+          ...(isScannerUpload && { isInUse: true }),
         },
       },
       { upsert: true }

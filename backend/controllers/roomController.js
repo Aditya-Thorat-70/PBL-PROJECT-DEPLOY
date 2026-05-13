@@ -57,7 +57,8 @@ exports.getRoomById = async (req, res) => {
       createdAt: room.createdAt,
       expiresAt: room.expiresAt,
       timerMode: room.timerMode || "standard-48h",
-      isActive: true
+      isActive: true,
+      isInUse: room.isInUse || false
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -95,6 +96,7 @@ exports.activateRoomOnPc = async (req, res) => {
       expiresAt: room.expiresAt,
       timerMode: room.timerMode,
       isActive: true,
+      isInUse: room.isInUse || false,
     });
   } catch (err) {
     return res.status(500).json({ error: err.message });

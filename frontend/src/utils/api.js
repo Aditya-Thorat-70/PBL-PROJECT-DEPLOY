@@ -64,6 +64,7 @@ export const fetchRoomById = async (roomId) => {
     expiresAt: data.expiresAt,
     timerMode: data.timerMode,
     isActive: data.isActive,
+    isInUse: data.isInUse || false,
   };
 };
 
@@ -84,6 +85,7 @@ export const activateRoomOnPc = async (roomId) => {
     expiresAt: data.expiresAt,
     timerMode: data.timerMode,
     isActive: data.isActive,
+    isInUse: data.isInUse || false,
   };
 };
 

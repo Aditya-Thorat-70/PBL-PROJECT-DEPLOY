@@ -1,6 +1,6 @@
 import UploadForm from "./UploadForm";
 
-export default function MobileDashboard({ onUpload, initialRoomId, uploadSource = "mobile" }) {
+export default function MobileDashboard({ onUpload, initialRoomId, uploadSource = "mobile", roomInUse = false }) {
   const detectedRoomId = initialRoomId || null;
   const isScannerMode = uploadSource === "scanner";
 
@@ -28,10 +28,15 @@ export default function MobileDashboard({ onUpload, initialRoomId, uploadSource 
             Scanner upload mode: this room will use a 10-minute timer.
           </p>
         )}
+        {roomInUse && isScannerMode && (
+          <p className="text-xs text-red-700 mt-2 font-semibold">
+            ⚠️ This scanner room is currently in use. Please wait or try a different room.
+          </p>
+        )}
       </div>
 
       <div className="mt-4">
-        <UploadForm roomId={detectedRoomId} onUpload={onUpload} uploadSource={uploadSource} />
+        <UploadForm roomId={detectedRoomId} onUpload={onUpload} uploadSource={uploadSource} roomInUse={roomInUse} />
       </div>
     </div>
   );

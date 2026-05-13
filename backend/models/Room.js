@@ -18,6 +18,10 @@ const roomSchema = new mongoose.Schema({
     type: String,
     enum: ["standard-48h", "scanner-10m", "pc-open-10m"],
     default: "standard-48h"
+  },
+  isInUse: {
+    type: Boolean,
+    default: false
   }
 });
 roomSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });

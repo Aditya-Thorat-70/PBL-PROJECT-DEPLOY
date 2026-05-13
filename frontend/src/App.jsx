@@ -22,10 +22,20 @@ export default function App() {
   const [roomFiles, setRoomFiles] = useState({ [initialRoomId]: [] });
   const [roomExpiryById, setRoomExpiryById] = useState({});
   const [roomTimerModeById, setRoomTimerModeById] = useState({});
+  const [roomInUseById, setRoomInUseById] = useState({});
   const [socket, setSocket] = useState(null);
   const { toasts, toast, removeToast } = useToast();
 
   const files = roomFiles[roomId] || [];
+
+  // Fetch prefilled room status to check if it's in use (for scanner QR)
+  useEffect(() => {
+    if (mobilePrefillRoomId && mobileUploadSource === "scanner") {
+      loadRoomSession(mobilePrefillRoomId).catch((error) => {
+        console.warn("Failed to fetch prefilled room status:", error?.message || error);
+      });
+    }
+  }, [mobilePrefillRoomId, mobileUploadSource]);
 
   // Setup Socket.io connection
   useEffect(() => {
@@ -173,6 +183,12 @@ export default function App() {
         [nextRoomId]: roomData.timerMode,
       }));
     }
+    if (typeof roomData.isInUse !== 'undefined') {
+      setRoomInUseById((prev) => ({
+        ...prev,
+        [nextRoomId]: roomData.isInUse,
+      }));
+    }
     return roomData;
   };
 
@@ -213,6 +229,10 @@ export default function App() {
       setRoomTimerModeById((prev) => ({
         ...prev,
         [nextRoomId]: activatedRoom.timerMode || "pc-open-10m",
+      }));
+      setRoomInUseById((prev) => ({
+        ...prev,
+        [nextRoomId]: activatedRoom.isInUse || false,
       }));
 
       const fetchedFiles = await loadRoomFiles(nextRoomId);
@@ -349,6 +369,7 @@ export default function App() {
                 onUpload={handleUpload}
                 initialRoomId={mobilePrefillRoomId}
                 uploadSource={mobileUploadSource}
+                roomInUse={mobilePrefillRoomId ? roomInUseById[mobilePrefillRoomId] : false}
               />
             )}
           </>
